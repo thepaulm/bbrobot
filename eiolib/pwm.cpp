@@ -119,6 +119,12 @@ pwm::set_duty_pct(unsigned p)
     return set_duty_ns(min_ns + ((float)p / 100.0) * (max_ns - min_ns));
 }
 
+unsigned
+pwm::get_duty_pct()
+{
+    return 100.0 * (float)(duty_ns - min_ns) / (float)(max_ns - min_ns);
+}
+
 /* These will change what the pct is measured relative to */
 void
 pwm::set_min_us(unsigned m)
@@ -232,6 +238,7 @@ native_pwm::set_duty_ns(unsigned d)
         duty_ns = d;
         return delay;
     } else {
+        duty_ns = d;
         return -1;
     }
 }
@@ -283,6 +290,7 @@ pmssc_pwm::set_duty_ns(unsigned ns)
         duty_ns = ns;
         return delay;
     } else {
+        duty_ns = ns;
         return -1;
     }
 }

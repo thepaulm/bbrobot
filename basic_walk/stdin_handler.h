@@ -16,6 +16,10 @@ public:
 private:
     bool configed;
     struct termios orig_termios;
+    void run_callibration();
+    void inc_servo(int num);
+    void dec_servo(int num);
+    void commit_callibration();
 };
 
 extern stdin_handler key_handler;

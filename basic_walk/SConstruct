@@ -24,7 +24,9 @@ arch = ARGUMENTS.get('arch', 'arm')
 if arch == 'arm':
     setup_arm(env)
 
-env.Append(CCFLAGS = '-g')
+if arch == 'intel':
+    env.Append(CCFLAGS = '-g')
+
 env.Append(CXXFLAGS = '-O2')
 env.Append(CXXFLAGS = '-std=c++0x')
 

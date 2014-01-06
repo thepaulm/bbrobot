@@ -17,19 +17,6 @@ arm::arm(pwm *top, pwm *bottom, int flags)
 , state(0)
 , comp(NULL)
 {
-    /*
-    if (flags & LEFT) {
-        high = LEG_HIGH;
-        low = LEG_LOW;
-        forward = ARM_FORWARD;
-        backward = ARM_BACKWARD;
-    } else {
-        high = 100 - LEG_HIGH;
-        low = 100 - LEG_LOW;
-        forward = 100 - ARM_FORWARD;
-        backward = 100 - ARM_BACKWARD;
-    }*/
-
     if (((flags & RIGHT) && (flags & FRONT)) ||
         ((flags & LEFT)  && (flags & BACK))) {
         high = 100 - LEG_HIGH;
@@ -56,6 +43,38 @@ arm::~arm()
     delete top;
     delete bottom;
     delete sweeper;
+}
+
+void
+arm::save_forward_state()
+{
+    cout << "setting forward from " << forward;
+    forward = bottom->get_duty_pct();
+    cout << " to " << forward << endl;
+}
+
+void
+arm::save_backward_state()
+{
+    cout << "setting backward from " << backward;
+    backward = bottom->get_duty_pct();
+    cout << " to " << backward << endl;
+}
+
+void
+arm::save_up_state()
+{
+    cout << "setting up state from " << high;
+    high = top->get_duty_pct();
+    cout << " to " << high << endl;
+}
+
+void
+arm::save_down_state()
+{
+    cout << "setting down state from " << low;
+    low = top->get_duty_pct();
+    cout << " to " << low << endl;
 }
 
 void

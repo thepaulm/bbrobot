@@ -22,6 +22,7 @@ public:
 
     unsigned get_duty_ns();
     unsigned get_duty_us();
+    unsigned get_duty_pct();
 
     /* Changing these will change the pct values */
     void set_min_us(unsigned);

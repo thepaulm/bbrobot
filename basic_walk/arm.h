@@ -41,6 +41,16 @@ public:
     /* Is this arm currently in motion */
     bool busy();
 
+    void inc_top() {top->inc();}
+    void inc_bottom() {bottom->inc();}
+    void dec_top() {top->dec();}
+    void dec_bottom() {top->dec();}
+
+    void save_forward_state();
+    void save_backward_state();
+    void save_up_state();
+    void save_down_state();
+
 private:
     pwm *top;
     pwm *bottom;
