@@ -77,8 +77,6 @@ pmssc::connect()
         device->open(device_path.c_str(), ofstream::out | ofstream::app);
         if (!device->is_open()) {
             cerr << "Failed to open device " << device_path << endl;
-            delete device;
-            device = NULL;
             return false;
         }
         cout << "I opened and cached " << device_path << endl;
