@@ -1,0 +1,90 @@
+#!/usr/bin/env python
+
+import subprocess, shlex, sys, glob, re
+
+slots_path = "/sys/devices/bone_capemgr.7/slots"
+ocp_path = "/sys/devices/ocp.2"
+gpio_state = "rxDisable_pullNone"
+class_path = "/sys/class/gpio"
+
+# Helpers
+def syntax():
+    print "gpio_config [pN where N is 8 or 9] [pin]"
+
+# slots
+def get_slots():
+    global slots_path
+    slots = get_shell_result('cat ' + slots_path + " | sed 's/.*,//'")
+    return slots
+
+def get_shell_result(s):
+    out = shlex.split(subprocess.check_output(s, shell=True))
+    return out
+
+def install_dtbo(p, pin):
+
+    slots = get_slots()
+
+    print "Installing device tree overlay for p%d pin %d ..." % (p, pin)
+    dtbo = "gpio-P%d.%d" % (p, pin)
+
+    if dtbo in slots:
+        print dtbo + " already in slots."
+    else:
+        try:
+            get_shell_result("echo " + dtbo + " > " + slots_path)
+        except Exception, e:
+            print "Unable to install dtbo " + dtbo + ", are you sure you " \
+                  "got the right pin?"
+            sys.exit(-1)
+
+def find_ocp(p, pin):
+    base = "gpio-P%d.%d_gpio" % (p, pin)
+    res = glob.glob(ocp_path + '/' + base + '*')
+    return res[0]
+
+def set_gpio_state(ocp):
+    print "Setting state to " + gpio_state
+    res = get_shell_result("echo %s > %s/state" % (gpio_state, ocp))
+    if len(res):
+        print res
+
+def get_gpio_num(ocp):
+    m = re.search(".*gpio(\d+).\d+$", ocp)
+    if m:
+        return int(m.group(1))
+    else:
+        print "failed to search"
+        return 0
+
+def export_gpio(gpio_num):
+    res = glob.glob(class_path + "/gpio%d" % gpio_num)
+    if len(res):
+        print "Gpio %d already exported." % gpio_num
+    else:
+        res = get_shell_result("echo %d > %s/export" % (gpio_num, class_path))
+        if len(res):
+            print res
+
+def set_gpio_direction(gpio_num):
+    get_shell_result("echo out > %s/gpio%d/direction" % (class_path, gpio_num))
+
+def main():
+    if len(sys.argv) < 3:
+        syntax()
+        return
+
+    p = int(sys.argv[1])
+    pin = int(sys.argv[2])
+
+    install_dtbo(p, pin)
+    ocp = find_ocp(p, pin)
+    set_gpio_state(ocp)
+    gpio_num = get_gpio_num(ocp)
+    export_gpio(gpio_num)
+    set_gpio_direction(gpio_num)
+
+    print "Your gpio num is %d (%s/gpio%d)" % (gpio_num, class_path, gpio_num)
+ 
+if __name__ == '__main__':
+    main()

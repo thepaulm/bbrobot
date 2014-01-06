@@ -1,0 +1,51 @@
+Import('env')
+
+# libs to depend on
+libs = []
+# include dirs (-I)
+cpppath = []
+# link dirs (-L)
+libpath = []
+
+def compile_library(env, lib, srcdir=None, includedir=None):
+    if not srcdir:
+        scons_script_path = '../../%s/SConscript' % lib
+    else:
+        scons_script_path = srcdir + '/SConscript'
+
+    if not includedir:
+        includedir = '../../%s' % lib
+
+    # TODO: Someday don't have everybody see every include path
+    SConscript(scons_script_path,
+               variant_dir='./build_%s' % lib, exports='env')
+    libs.append(lib)
+    cpppath.append(includedir)
+    libpath.append("./build_%s" % lib)
+
+def make_cpppath_lib(cpppath):
+    cpppathlib = []
+    for p in cpppath:
+        cpppathlib.append('../' + p)
+    return cpppathlib
+
+libenv = env.Clone()
+
+compile_library(libenv, 'eiolib')
+compile_library(libenv, 'pmssclib')
+
+#compile_library(env, 'libjson',
+#                srcdir='../../../jsoncpp-src-0.5.0/src/lib_json/',
+#                includedir='/home/paulm/code/jsoncpp-src-0.5.0/include')
+
+libcpppath = make_cpppath_lib(cpppath)
+libenv.Append(CPPPATH=libcpppath)
+
+env.Append(CPPPATH=cpppath)
+env.Replace(LIBPATH=libpath)
+
+src = Glob('*.cpp')
+t = env.Program(target="basic_walk", source=src, LIBS=libs)
+
+Default(t)
+

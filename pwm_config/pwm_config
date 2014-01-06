@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+
+import subprocess, shlex, sys
+
+slots_path = "/sys/devices/bone_capemgr.7/slots"
+ocp_path = "/sys/devices/ocp.2"
+
+# Helpers
+def syntax():
+    print "pwm_config [pN where N is 8 or 9] [pin]"
+
+def get_shell_result(s):
+    out = shlex.split(subprocess.check_output(s, shell=True))
+    return out
+
+# pwm_test
+def pwm_test_installed():
+    out = get_shell_result("lsmod | awk '{print $1}'")
+    for l in out:
+        if l == "pwm_test":
+            return True
+
+    return False
+
+def install_pwm_test():
+    get_shell_result("modprobe pwm_test")
+
+# slots
+def get_slots():
+    global slots_path
+    slots = get_shell_result('cat ' + slots_path + " | sed 's/.*,//'")
+    return slots
+
+# device tree overlays
+def install_am33xx_pwm():
+    get_shell_result("echo am33xx_pwm > " + slots_path)
+
+def install_dtbo(dtbo):
+    global slots_path
+    return get_shell_result("echo " + dtbo + " > " + slots_path)
+
+def print_pwm_path(p, pin):
+    global ocp_path
+    out = get_shell_result("ls -d %s/pwm_test_P%d_%d*" % (ocp_path, p, pin))
+    print "Path to pwm dir:"
+    print out[0]
+
+def main():
+    nopins = False
+    if len(sys.argv) < 3:
+        syntax()
+        print "(we will just config for am33xx_pwm)"
+        nopins = True
+
+    if pwm_test_installed():
+        print "pwm_test driver already loaded."
+    else:
+        print "installing pwm_test driver."
+        install_pwm_test()
+
+    print
+
+    slots = get_slots()
+    if 'am33xx_pwm' in slots:
+        print "am33xx_pwm already in slots."
+    else:
+        print "installing am33xx_pwm in slots."
+        install_am33xx_pwm()
+
+    if nopins:
+        print "Done."
+        return
+
+    print
+
+    p = int(sys.argv[1])
+    pin = int(sys.argv[2])
+
+    print "Installing device tree overlay for p%d pin %d ..." % (p, pin)
+    dtbo = "sc_pwm_P%d_%.2d" % (p, pin)
+
+    if dtbo in slots:
+        print dtbo + " already in slots."
+    else:
+        try:
+            ret = install_dtbo(dtbo)
+            print "Done."
+        except Exception, e:
+            print "Unable to install dtbo " + dtbo + ", are you sure you " \
+                  "got the right pin?"
+
+    print
+    print_pwm_path(p, pin)
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,35 @@
+#
+# Set these for your installation
+#
+cross_tools_path = "/usr/bin/"
+cross_common_prefix = "arm-linux-gnueabi"
+ctags_binpath = '/usr/bin/ctags'
+
+# Everything below here should not need to change
+
+def setup_arm(env):
+
+    gpp_path = cross_tools_path + cross_common_prefix + "-g++"
+    ranlib_path = cross_tools_path + cross_common_prefix + "-ranlib"
+    ar_path = cross_tools_path + cross_common_prefix + "-ar"
+
+    env['CXX'] = gpp_path
+    env['RANLIB'] = ranlib_path
+    env['AR'] = ar_path
+
+env = Environment()
+
+arch = ARGUMENTS.get('arch', 'arm')
+
+if arch == 'arm':
+    setup_arm(env)
+
+#env.Append(CCFLAGS = '-g')
+env.Append(CXXFLAGS = '-O2')
+env.Append(CXXFLAGS = '-std=c++0x')
+
+env['BUILDERS']['CTags'] = Builder(action=ctags_binpath + ' -R --exclude=build')
+env.CTags(target='ctags', source = None)
+env.CTags
+SConscript('./SConscript', variant_dir='./build', duplicate=0, exports='env')
+Export('env')

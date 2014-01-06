@@ -1,0 +1,7 @@
+Import('env')
+
+src = Glob('*.cpp')
+
+l = env.Library(target="pmssclib", source=src)
+
+Default(l)

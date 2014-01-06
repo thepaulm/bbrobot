@@ -1,0 +1,122 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ARM_BACKWARD	arm.cpp	8;"	d	file:
+ARM_FORWARD	arm.cpp	7;"	d	file:
+ARM_TYPE	arm.h	/^enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};$/;"	g
+ARROW_DOWN	stdin_handler.cpp	43;"	d	file:
+ARROW_LEFT	stdin_handler.cpp	45;"	d	file:
+ARROW_RIGHT	stdin_handler.cpp	44;"	d	file:
+ARROW_UP	stdin_handler.cpp	42;"	d	file:
+BACK	arm.h	/^enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};$/;"	e	enum:ARM_TYPE
+FRONT	arm.h	/^enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};$/;"	e	enum:ARM_TYPE
+LEFT	arm.h	/^enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};$/;"	e	enum:ARM_TYPE
+LEG_HIGH	arm.cpp	5;"	d	file:
+LEG_LOW	arm.cpp	6;"	d	file:
+RIGHT	arm.h	/^enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};$/;"	e	enum:ARM_TYPE
+US_PER_MS	timevals.cpp	4;"	d	file:
+US_PER_S	timevals.cpp	3;"	d	file:
+_ARM_H	arm.h	2;"	d
+_ARM_SWEEP_DELEGATE_H	arm_sweep_delegate.h	2;"	d
+_NERVOUS_SYSTEM_H	nervous_system.h	2;"	d
+_SCHEDULER_H	scheduler.h	2;"	d
+_STDIN_HANDLER_H	stdin_handler.h	2;"	d
+_TIMEVALS_H	timevals.h	2;"	d
+add_schedule_item	scheduler.cpp	/^scheduler::add_schedule_item(struct timeval *tv, schedule_item *item)$/;"	f	class:scheduler
+add_schedule_item_ms	scheduler.cpp	/^scheduler::add_schedule_item_ms(unsigned ms, schedule_item *item)$/;"	f	class:scheduler
+add_schedule_item_us	scheduler.cpp	/^scheduler::add_schedule_item_us(unsigned us, schedule_item *item)$/;"	f	class:scheduler
+arm	arm.cpp	/^arm::arm(pwm *top, pwm *bottom, int flags)$/;"	f	class:arm
+arm	arm.h	/^class arm : public schedule_item$/;"	c
+arm_completion_handler	arm.h	/^class arm_completion_handler$/;"	c
+arm_sweep_delegate	arm_sweep_delegate.cpp	/^arm_sweep_delegate::arm_sweep_delegate(arm *arm)$/;"	f	class:arm_sweep_delegate
+arm_sweep_delegate	arm_sweep_delegate.h	/^class arm_sweep_delegate : public schedule_item$/;"	c
+backward	arm.h	/^    unsigned backward;$/;"	m	class:arm
+bottom	arm.h	/^    pwm *bottom;$/;"	m	class:arm
+comp	arm.h	/^    arm_completion_handler *comp;$/;"	m	class:arm
+config	stdin_handler.cpp	/^stdin_handler::config()$/;"	f	class:stdin_handler
+configed	stdin_handler.h	/^    bool configed;$/;"	m	class:stdin_handler
+connect	arm.cpp	/^arm::connect()$/;"	f	class:arm
+connect	nervous_system.cpp	/^nervous_system::connect()$/;"	f	class:nervous_system
+cycle_backward	arm.cpp	/^arm::cycle_backward(scheduler *sched, arm_completion_handler *c)$/;"	f	class:arm
+cycle_forward	arm.cpp	/^arm::cycle_forward(scheduler *sched, arm_completion_handler *c)$/;"	f	class:arm
+disconnect	arm.cpp	/^arm::disconnect()$/;"	f	class:arm
+disconnect	nervous_system.cpp	/^nervous_system::disconnect()$/;"	f	class:nervous_system
+exiting	main.cpp	/^exiting(void)$/;"	f
+finish	nervous_system.cpp	/^nervous_system::finish(scheduler *sched, arm *done)$/;"	f	class:nervous_system
+fire	arm.cpp	/^arm::fire(scheduler *sched)$/;"	f	class:arm
+fire	arm_sweep_delegate.cpp	/^arm_sweep_delegate::fire(scheduler *sched)$/;"	f	class:arm_sweep_delegate
+fire	stdin_handler.cpp	/^stdin_handler::fire(scheduler *psched)$/;"	f	class:stdin_handler
+flags	arm.h	/^    int flags;$/;"	m	class:arm
+forward	arm.h	/^    unsigned forward;$/;"	m	class:arm
+high	arm.h	/^    unsigned high;$/;"	m	class:arm
+highest_ios	scheduler.h	/^    int highest_ios;$/;"	m	class:scheduler
+id	scheduler.h	/^    schedule_ticket id;$/;"	m	class:queued_schedule_item
+io_item	scheduler.cpp	/^scheduler::io_item(int fd, schedule_item *item)$/;"	f	class:scheduler
+ios_handlers	scheduler.h	/^    std::map<int, schedule_item *> ios_handlers;$/;"	m	class:scheduler
+item	scheduler.h	/^    schedule_item *item;$/;"	m	class:queued_schedule_item
+left_active	nervous_system.h	/^    bool left_active;$/;"	m	class:nervous_system
+left_arm	nervous_system.h	/^    arm *left_arm;$/;"	m	class:nervous_system
+left_leg	nervous_system.h	/^    arm *left_leg;$/;"	m	class:nervous_system
+loop	scheduler.cpp	/^scheduler::loop()$/;"	f	class:scheduler
+low	arm.h	/^    unsigned low;$/;"	m	class:arm
+main	main.cpp	/^main(int argc, char *argv[])$/;"	f
+main	unittest/tvpq.cpp	/^main(int argc, char *argv[])$/;"	f
+max_ticket	scheduler.h	/^    unsigned max_ticket; \/\/XXXPAM: Some day this will wrap around$/;"	m	class:scheduler
+nervous_system	nervous_system.cpp	/^nervous_system::nervous_system(arm *rf, arm *lf, arm *rb, arm *lb)$/;"	f	class:nervous_system
+nervous_system	nervous_system.h	/^class nervous_system : public arm_completion_handler$/;"	c
+now	scheduler.h	/^    struct timeval now;$/;"	m	class:scheduler	typeref:struct:scheduler::timeval
+operator ()	scheduler.cpp	/^queued_schedule_item_comparitor::operator()$/;"	f	class:queued_schedule_item_comparitor
+operator ()	unittest/tvpq.cpp	/^tv_sched_comparitor::operator()(const tv_sched_item& lhs,$/;"	f	class:tv_sched_comparitor
+orig_termios	stdin_handler.h	/^    struct termios orig_termios;$/;"	m	class:stdin_handler	typeref:struct:stdin_handler::termios
+parm	arm_sweep_delegate.h	/^    arm *parm;$/;"	m	class:arm_sweep_delegate
+pq	unittest/tvpq.cpp	/^                    tv_sched_comparitor> pq;$/;"	v
+queued_schedule_item	scheduler.h	/^    queued_schedule_item(struct timeval _tv,$/;"	f	class:queued_schedule_item
+queued_schedule_item	scheduler.h	/^class queued_schedule_item$/;"	c
+queued_schedule_item_comparitor	scheduler.h	/^class queued_schedule_item_comparitor$/;"	c
+request_backward	arm.cpp	/^arm::request_backward()$/;"	f	class:arm
+request_down	arm.cpp	/^arm::request_down()$/;"	f	class:arm
+request_forward	arm.cpp	/^arm::request_forward()$/;"	f	class:arm
+request_up	arm.cpp	/^arm::request_up()$/;"	f	class:arm
+reset	stdin_handler.cpp	/^stdin_handler::reset()$/;"	f	class:stdin_handler
+right_active	nervous_system.h	/^    bool right_active;$/;"	m	class:nervous_system
+right_arm	nervous_system.h	/^    arm *right_arm;$/;"	m	class:nervous_system
+right_leg	nervous_system.h	/^    arm *right_leg;$/;"	m	class:nervous_system
+sched	scheduler.cpp	/^scheduler *sched = new scheduler();$/;"	v
+schedule_item	scheduler.h	/^class schedule_item$/;"	c
+schedule_ticket	scheduler.h	/^typedef unsigned schedule_ticket;$/;"	t
+scheduler	scheduler.cpp	/^scheduler::scheduler()$/;"	f	class:scheduler
+scheduler	scheduler.h	/^class scheduler$/;"	c
+setup_exits	main.cpp	/^setup_exits()$/;"	f
+sigexit	main.cpp	/^sigexit(int)$/;"	f
+spine	nervous_system.cpp	/^nervous_system *spine;$/;"	v
+state	arm.h	/^    int state;$/;"	m	class:arm
+state	arm_sweep_delegate.h	/^    int state;$/;"	m	class:arm_sweep_delegate
+state	nervous_system.h	/^    int state;$/;"	m	class:nervous_system
+stdin_handler	stdin_handler.h	/^    stdin_handler() :configed(false) {};$/;"	f	class:stdin_handler
+stdin_handler	stdin_handler.h	/^class stdin_handler : public schedule_item$/;"	c
+stop	nervous_system.cpp	/^nervous_system::stop(scheduler *sched)$/;"	f	class:nervous_system
+sweep	arm.cpp	/^arm::sweep(scheduler *sched)$/;"	f	class:arm
+sweep	arm_sweep_delegate.cpp	/^arm_sweep_delegate::sweep(scheduler *sched)$/;"	f	class:arm_sweep_delegate
+sweeper	arm.h	/^    arm_sweep_delegate *sweeper;$/;"	m	class:arm
+timed_handlers	scheduler.h	/^                        queued_schedule_item_comparitor>timed_handlers;$/;"	m	class:scheduler
+top	arm.h	/^    pwm *top;$/;"	m	class:arm
+tv	scheduler.h	/^    struct timeval tv;$/;"	m	class:queued_schedule_item	typeref:struct:queued_schedule_item::timeval
+tv	unittest/tvpq.cpp	/^    struct timeval tv;$/;"	m	class:tv_sched_item	typeref:struct:tv_sched_item::timeval	file:
+tv_compare	timevals.cpp	/^tv_compare(const struct timeval& lhs, const struct timeval& rhs)$/;"	f
+tv_minus_floor	timevals.cpp	/^tv_minus_floor(struct timeval *tv, struct timeval *mtv)$/;"	f
+tv_plus_ms	timevals.cpp	/^tv_plus_ms(struct timeval *tv, unsigned ms)$/;"	f
+tv_plus_us	timevals.cpp	/^tv_plus_us(struct timeval *tv, unsigned us)$/;"	f
+tv_sched_comparitor	unittest/tvpq.cpp	/^class tv_sched_comparitor$/;"	c	file:
+tv_sched_item	unittest/tvpq.cpp	/^    tv_sched_item(struct timeval _tv)$/;"	f	class:tv_sched_item
+tv_sched_item	unittest/tvpq.cpp	/^class tv_sched_item$/;"	c	file:
+update_now	scheduler.cpp	/^scheduler::update_now()$/;"	f	class:scheduler
+walk	nervous_system.cpp	/^nervous_system::walk(scheduler *sched)$/;"	f	class:nervous_system
+walking	nervous_system.cpp	/^nervous_system::walking(scheduler *sched)$/;"	f	class:nervous_system
+~arm	arm.cpp	/^arm::~arm()$/;"	f	class:arm
+~nervous_system	nervous_system.cpp	/^nervous_system::~nervous_system()$/;"	f	class:nervous_system
+~schedule_item	scheduler.h	/^    virtual ~schedule_item() {};$/;"	f	class:schedule_item
+~scheduler	scheduler.cpp	/^scheduler::~scheduler()$/;"	f	class:scheduler
+~stdin_handler	stdin_handler.h	/^    ~stdin_handler() {};$/;"	f	class:stdin_handler

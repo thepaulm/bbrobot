@@ -1,0 +1,13 @@
+Import('env')
+
+test_src = [
+            'tvpq.cpp',
+           ]
+
+srcs = [
+        '../timevals.cpp',
+       ]
+
+objs = map(env.Object, srcs)
+
+env.Program(target="tvpq", source=test_src + objs)
