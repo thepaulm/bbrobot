@@ -44,7 +44,7 @@ public:
     void inc_top() {top->inc();}
     void inc_bottom() {bottom->inc();}
     void dec_top() {top->dec();}
-    void dec_bottom() {top->dec();}
+    void dec_bottom() {bottom->dec();}
 
     void save_forward_state();
     void save_backward_state();

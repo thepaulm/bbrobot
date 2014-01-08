@@ -16,6 +16,57 @@
 #include "stdin_handler.h"
 #include "nervous_system.h"
 
+struct ssc_config
+{
+    const char *path;
+    unsigned num;
+};
+
+struct native_config
+{
+    unsigned bank;
+    unsigned pin;
+};
+
+enum pwm_type {NONE, SSC, NATIVE};
+struct  pwm_config
+{
+    enum pwm_type type;
+    union {
+        struct ssc_config ssc;
+        struct native_config native;
+    } data;
+
+    pwm_config(const char *path, int num)
+    : type(SSC)
+    {
+        data.ssc.path = path;
+        data.ssc.num = num;
+    }
+
+    pwm_config(int bank, int pin)
+    : type(NATIVE)
+    {
+        data.native.bank = bank;
+        data.native.pin = pin;
+        if (bank == pin == 0)
+            type = NONE;
+    }
+};
+
+struct pwm_config config[] =
+{
+    {"/dev/ttyO4", 0},
+    {"/dev/ttyO4", 1},
+    {"/dev/ttyO4", 2},
+    {"/dev/ttyO4", 3},
+    {9, 14},
+    {9, 16},
+    {8, 19},
+    {8, 13},
+    {0, 0}
+};
+
 using namespace std;
 
 /* coming from atexit */
@@ -45,6 +96,17 @@ setup_exits()
     signal(SIGINT, sigexit);
 }
 
+pwm *
+load_pwm_for_config(struct pwm_config *pconf)
+{
+    if (pconf->type == SSC)
+        return load_pmssc_pwm(pconf->data.ssc.path, pconf->data.ssc.num);
+    else if (pconf->type == NATIVE)
+        return load_native_pwm(pconf->data.native.bank, pconf->data.native.pin);
+    else
+        return load_null_pwm();
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -55,7 +117,7 @@ main(int argc, char *argv[])
         for (int i = 1; i < argc; i++) {
             int c = atoi(argv[i]);
             if (c < 8) {
-                pwms[c] = load_pmssc_pwm("/dev/ttyO4", c);
+                pwms[c] = load_pwm_for_config(&config[c]);
             } else {
                 cout << c << " too high!" << endl;
                 return -1;
@@ -67,21 +129,9 @@ main(int argc, char *argv[])
         }
     } else {
         for (int i = 0; i < 8; i++) {
-            pwms[i] = load_pmssc_pwm("/dev/ttyO4", i);
+            pwms[i] = load_pwm_for_config(&config[i]);
         }
     }
-
-    /*
-    pwms[0] = load_native_pwm(8, 13);
-    pwms[1] = load_native_pwm(8, 19);
-    pwms[2] = load_native_pwm(9, 14);
-    pwms[3] = load_native_pwm(9, 16);
-
-    pwms[4] = load_null_pwm();
-    pwms[5] = load_null_pwm();
-    pwms[6] = load_null_pwm();
-    pwms[7] = load_null_pwm();
-    */
 
     key_handler.config();
     setup_exits();
