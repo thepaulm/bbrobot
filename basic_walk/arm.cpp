@@ -116,7 +116,7 @@ arm::fire(scheduler *sched)
         case 10:
             {
                 delay = request_up();
-                if (delay > 0)
+                if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
             }
             break;
@@ -124,7 +124,7 @@ arm::fire(scheduler *sched)
         case 11:
             {
                 delay = request_forward();
-                if (delay > 0)
+                if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
             }
             break;
@@ -132,7 +132,7 @@ arm::fire(scheduler *sched)
         case 12:
             {
                 delay = request_down();
-                if (delay > 0)
+                if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
             }
             break;
@@ -150,7 +150,7 @@ arm::fire(scheduler *sched)
         case 20:
             {
                 delay = request_backward();
-                if (delay > 0)
+                if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
             }
             break;

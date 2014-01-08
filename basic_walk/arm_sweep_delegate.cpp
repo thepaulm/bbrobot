@@ -18,7 +18,7 @@ arm_sweep_delegate::fire(scheduler *sched)
         {
             cout << "leg up" << endl;
             delay = parm->request_up();
-            if (delay > 0)
+            if (delay >= 0)
                 sched->add_schedule_item_ms(delay, this);
         }
         break;
@@ -27,7 +27,7 @@ arm_sweep_delegate::fire(scheduler *sched)
         {
             cout << "arm forward" << endl;
             delay = parm->request_forward();
-            if (delay > 0)
+            if (delay >= 0)
                 sched->add_schedule_item_ms(delay, this);
         }
         break;
@@ -36,7 +36,7 @@ arm_sweep_delegate::fire(scheduler *sched)
         {
             cout << "leg down" << endl;
             delay = parm->request_down();
-            if (delay > 0)
+            if (delay >= 0)
                 sched->add_schedule_item_ms(delay, this);
         }
         break;
@@ -45,7 +45,7 @@ arm_sweep_delegate::fire(scheduler *sched)
         {
             cout << "arm backward" << endl;
             delay = parm->request_backward();
-            if (delay > 0)
+            if (delay >= 0)
                 sched->add_schedule_item_ms(delay, this);
         }
         break;

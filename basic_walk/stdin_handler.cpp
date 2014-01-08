@@ -169,6 +169,11 @@ stdin_handler::run_callibration()
                 break;
         }
 
+        cout << "[legs: 0  2]" << endl;
+        cout << "[      4  6]" << endl;
+        cout << "[arms: 1  3]" << endl;
+        cout << "[      5  7]" << endl;
+
         cout << "Enter servo num or arrow keys to align for " <<
                 (char)m << endl;
 
