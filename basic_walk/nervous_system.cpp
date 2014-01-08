@@ -2,11 +2,11 @@
 
 nervous_system *spine;
 
-nervous_system::nervous_system(arm *rf, arm *lf, arm *rb, arm *lb)
-: right_arm(rf)
-, left_arm(lf)
-, right_leg(rb)
+nervous_system::nervous_system(arm *lf, arm *rf, arm *lb, arm *rb)
+: left_arm(lf)
+, right_arm(rf)
 , left_leg(lb)
+, right_leg(rb)
 , state(0)
 {
 }

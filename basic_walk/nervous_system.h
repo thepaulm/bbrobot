@@ -6,7 +6,7 @@
 class nervous_system : public arm_completion_handler
 {
 public:
-    nervous_system(arm *rf, arm *lf, arm *rb, arm *lb);
+    nervous_system(arm *lf, arm *rf, arm *lb, arm *rb);
     ~nervous_system();
 
     void connect();

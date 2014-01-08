@@ -142,7 +142,6 @@ pmssc::set_duty_us(unsigned us)
     uint8_t data1, data2;
     data1 = pmssc_tics >> 7;
     data2 = pmssc_tics & ((1 << 7) - 1);
-    cout << "sending set position " << us << endl;
     return send_servo_cmd(SET_POSITION_ABS, data1, data2);
 }
 

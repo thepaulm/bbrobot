@@ -16,6 +16,9 @@
 #include "stdin_handler.h"
 #include "nervous_system.h"
 
+using namespace std;
+
+/* ----------------- Configuration of Servos --------------------------- */
 struct ssc_config
 {
     const char *path;
@@ -49,26 +52,26 @@ struct  pwm_config
     {
         data.native.bank = bank;
         data.native.pin = pin;
-        if (bank == pin == 0)
+        if (bank == 0 && pin == 0) {
             type = NONE;
+        }
     }
 };
 
 struct pwm_config config[] =
 {
-    {"/dev/ttyO4", 0},
-    {"/dev/ttyO4", 1},
-    {"/dev/ttyO4", 2},
-    {"/dev/ttyO4", 3},
-    {9, 14},
-    {9, 16},
-    {8, 19},
-    {8, 13},
+    {"/dev/ttyO4", 0},              //0
+    {"/dev/ttyO4", 1},              //1
+    {"/dev/ttyO4", 2},              //2
+    {"/dev/ttyO4", 3},              //3
+    {8, 19},                        //4
+    {9, 16},                        //5
+    {9, 14},                        //6
+    {8, 13},                        //7
     {0, 0}
 };
 
-using namespace std;
-
+/* ---------------------- Unix exit handlers -----------------------------*/
 /* coming from atexit */
 void
 exiting(void)
@@ -99,12 +102,18 @@ setup_exits()
 pwm *
 load_pwm_for_config(struct pwm_config *pconf)
 {
-    if (pconf->type == SSC)
+    cout << __FUNCTION__ << endl;
+    if (pconf->type == SSC) {
+        cout << "loading ssc pwm " << pconf->data.ssc.path << ":"
+             << pconf->data.ssc.num << endl;
         return load_pmssc_pwm(pconf->data.ssc.path, pconf->data.ssc.num);
-    else if (pconf->type == NATIVE)
+    } else if (pconf->type == NATIVE) {
+        cout << "loading native pwm " << pconf->data.native.bank << ":"
+             << pconf->data.native.pin << endl;
         return load_native_pwm(pconf->data.native.bank, pconf->data.native.pin);
-    else
+    } else {
         return load_null_pwm();
+    }
 }
 
 int
@@ -113,6 +122,9 @@ main(int argc, char *argv[])
     pwm *pwms[8];
     memset(pwms, 0, sizeof(pwm *) * 8);
 
+    /* If we have command line arguments, we assume they are integers
+       representing which servos should be turned on. If no command line
+       arguments then we run all servos */
     if (argc > 1) {
         for (int i = 1; i < argc; i++) {
             int c = atoi(argv[i]);
