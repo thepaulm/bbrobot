@@ -239,6 +239,12 @@ stdin_handler::fire(scheduler *psched)
                 spine->stop(sched);
                 break;
 
+            case 'p':
+                cout << "Paused ...." << endl;
+                if (read(fileno(stdin), &c, 1));
+                cout << "Unpause." << endl;
+                break;
+
             case 'c':
                 run_callibration();
             default:
