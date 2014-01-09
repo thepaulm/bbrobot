@@ -2,6 +2,7 @@
 #define _ARM_H
 
 #include "pwm.h"
+#include "gpio.h"
 #include "scheduler.h"
 
 enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};

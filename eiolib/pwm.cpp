@@ -9,6 +9,7 @@
 
 /* my c++ headers */
 #include "pwm.h"
+#include "bbdevices.h"
 
 #define NS_PER_MS (1000 * 1000)
 #define NS_PER_US (1000)
@@ -28,28 +29,11 @@
 
 using namespace std;
 
-#define OCP_PATH "/sys/devices/ocp.2"
-
 /* class creation method */
 static std::string *
 find_dir_for_pwm(unsigned p, unsigned pin)
 {
-    std::string *ret = NULL;
-    glob_t g;
-    char glob_buffer[64];
-    sprintf(glob_buffer, OCP_PATH "/pwm_test_P%d_%d.*", p, pin);
-
-    g.gl_offs = 1;
-    glob(glob_buffer, 0, NULL, &g);
-    if (g.gl_pathc) {
-        ret = new std::string(g.gl_pathv[0]);
-    } else {
-        ret = new std::string("");
-    }
-
-    globfree(&g);
-
-    return ret;
+    return find_ocp_dir_for_glob("pwm_test_P%d_%d.*", p, pin);
 }
 
 pwm *
@@ -58,6 +42,7 @@ load_native_pwm(unsigned p, unsigned pin)
     pwm *pret = NULL;
     string *path;
     path = find_dir_for_pwm(p, pin);
+    cout << "found my path:" << *path << endl;
     pret = new native_pwm(*path);
     delete path;
     return pret;

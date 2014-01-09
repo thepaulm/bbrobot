@@ -3,10 +3,14 @@
 
 #include "arm.h"
 
-class nervous_system : public arm_completion_handler
+class nervous_system : public arm_completion_handler, public schedule_item
 {
 public:
-    nervous_system(arm *lf, arm *rf, arm *lb, arm *rb);
+    nervous_system(arm *lf, gpio *lfvalve,
+                   arm *rf, gpio *rfvalve,
+                   arm *lb, gpio *lbvalve,
+                   arm *rb, gpio *rbvalve,
+                   gpio *pump);
     ~nervous_system();
 
     void connect();
@@ -16,16 +20,26 @@ public:
     void stop(scheduler *);
 
     void finish(scheduler *, arm *);
+    void fire(scheduler *);
 
     arm *right_arm;
     arm *left_arm;
     arm *right_leg;
     arm *left_leg;
 
+    gpio *pump;
+
+    gpio *lfvalve;
+    gpio *rfvalve;
+    gpio *lbvalve;
+    gpio *rbvalve;
+
     int state;
 
 private:
     void walking(scheduler *);
+    void pump_left();
+    void pump_right();
 
     bool arms_busy();
 };

@@ -11,6 +11,7 @@
 
 /* my c++ headers */
 #include "pwm.h"
+#include "gpio.h"
 #include "scheduler.h"
 #include "arm.h"
 #include "stdin_handler.h"
@@ -32,7 +33,7 @@ struct native_config
 };
 
 enum pwm_type {NONE, SSC, NATIVE};
-struct  pwm_config
+struct pwm_config
 {
     enum pwm_type type;
     union {
@@ -68,6 +69,23 @@ struct pwm_config config[] =
     {9, 16},                        //5
     {9, 14},                        //6
     {8, 13},                        //7
+    {0, 0}
+};
+
+/* ----------------- Configuration of Solenoids ------------------------- */
+struct gpio_config
+{
+    unsigned p;
+    unsigned pin;
+};
+
+struct gpio_config config_gpio[] =
+{
+    {9, 12},                        //0
+    {9, 15},                        //1
+    {9, 23},                        //2
+    {9, 25},                        //3
+    {9, 27},                        //4
     {0, 0}
 };
 
@@ -116,10 +134,17 @@ load_pwm_for_config(struct pwm_config *pconf)
     }
 }
 
+gpio *
+load_gpio_for_config(struct gpio_config *pconf)
+{
+    return load_gpio(pconf->p, pconf->pin);
+}
+
 int
 main(int argc, char *argv[])
 {
     pwm *pwms[8];
+    gpio *gpios[5];
     memset(pwms, 0, sizeof(pwm *) * 8);
 
     /* If we have command line arguments, we assume they are integers
@@ -145,16 +170,34 @@ main(int argc, char *argv[])
         }
     }
 
+    for (int i = 0; i < 5; i++) {
+        gpios[i] = load_gpio_for_config(&config_gpio[i]);
+    }
+
     key_handler.config();
     setup_exits();
 
     sched->io_item(fileno(stdin), &key_handler);
 
     spine = new nervous_system(
+                               /* Left front arm */
                                new arm(pwms[1], pwms[0], LEFT | FRONT),
+                               gpios[0],
+
+                               /* Right front arm */
                                new arm(pwms[3], pwms[2], RIGHT | FRONT),
+                               gpios[1],
+
+                               /* Left back leg */
                                new arm(pwms[5], pwms[4], LEFT | BACK),
-                               new arm(pwms[7], pwms[6], RIGHT | BACK)
+                               gpios[2],
+
+                               /* Right back leg */
+                               new arm(pwms[7], pwms[6], RIGHT | BACK),
+                               gpios[3],
+
+                               /* Vacuum pump */
+                               gpios[4]
                                );
 
     spine->connect();
