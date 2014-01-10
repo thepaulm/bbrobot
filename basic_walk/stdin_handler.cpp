@@ -133,6 +133,12 @@ stdin_handler::dec_servo(int num)
     spine->left_leg->f();                                                   \
     spine->right_leg->f();
 
+#define each_valve(f)                                                       \
+    spine->lfvalve->f();                                                    \
+    spine->rfvalve->f();                                                    \
+    spine->lbvalve->f();                                                    \
+    spine->rbvalve->f();
+
 void
 stdin_handler::run_callibration()
 {
@@ -237,6 +243,34 @@ stdin_handler::fire(scheduler *psched)
             case ARROW_DOWN:
                 cout << "Stop." << endl;
                 spine->stop(sched);
+                break;
+
+            case 's':
+                cout << "Stand." << endl;
+                each_arm(request_standing);
+                break;
+
+            case 'h':
+                cout << "Hang test." << endl;
+                spine->right_arm->request_standing();
+                spine->left_leg->request_standing();
+                spine->left_arm->request_forward();
+                spine->right_leg->request_backward();
+                spine->rfvalve->on();
+                spine->lbvalve->on();
+                spine->lfvalve->off();
+                spine->rbvalve->off();
+                spine->pump->on();
+                break;
+
+            case 'a':
+                cout << "Toggling pump." << endl;
+                spine->pump->toggle();
+                break;
+
+            case 'v':
+                cout << "Toggling valves." << endl;
+                each_valve(toggle);
                 break;
 
             case 'p':

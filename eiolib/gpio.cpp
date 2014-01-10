@@ -52,6 +52,7 @@ load_gpio(unsigned p, unsigned pin)
 
 gpio::gpio(const std::string path)
 : path(path)
+, status(false)
 {
 }
 
@@ -60,8 +61,22 @@ gpio::~gpio()
 }
 
 bool
+gpio::toggle()
+{
+    set_value(!status);
+    return status;
+}
+
+bool
+gpio::get_status()
+{
+    return status;
+}
+
+bool
 gpio::set_value(int value)
 {
+    status = (bool)value;
     return write_file_value("value", value);
 }
 

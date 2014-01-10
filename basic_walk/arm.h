@@ -38,6 +38,7 @@ public:
     int request_down();
     int request_forward();
     int request_backward();
+    int request_standing();
 
     /* Is this arm currently in motion */
     bool busy();

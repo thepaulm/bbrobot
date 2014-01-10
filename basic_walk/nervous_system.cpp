@@ -1,6 +1,6 @@
 #include "nervous_system.h"
 
-#define PUMP_SWITCH_DELAY_MS 2000
+#define PUMP_SWITCH_DELAY_MS 1000
 
 nervous_system *spine;
 

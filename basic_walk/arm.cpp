@@ -4,8 +4,8 @@
 
 #define LEG_HIGH 55
 #define LEG_LOW 65
-#define ARM_FORWARD 70
-#define ARM_BACKWARD 30
+#define ARM_FORWARD 60
+#define ARM_BACKWARD 40
 
 using namespace std;
 
@@ -210,6 +210,12 @@ int
 arm::request_backward()
 {
     return bottom->set_duty_pct(backward);
+}
+
+int
+arm::request_standing()
+{
+    return bottom->set_duty_pct((forward + backward) / 2);
 }
 
 int
