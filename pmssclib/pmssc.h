@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include "json/json.h"
 
 typedef unsigned char uint8_t;
 
@@ -22,6 +23,8 @@ public:
     bool stop();
     bool start();
     bool ok();
+
+    bool get_json_config(Json::Value& n);
 
 private:
     bool configure_device();

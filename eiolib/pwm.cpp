@@ -247,7 +247,10 @@ native_pwm::start()
 bool
 native_pwm::get_json_config(Json::Value& n)
 {
-    return false;
+    n["type"] = Json::Value("native");
+    n["bank"] = Json::Value(bank);
+    n["pin"] = Json::Value(pin);
+    return true;
 }
 
 /****************************************************************************
@@ -312,7 +315,7 @@ pmssc_pwm::ok()
 bool
 pmssc_pwm::get_json_config(Json::Value& n)
 {
-    return false;
+    return ssc->get_json_config(n);
 }
 
 /***************************************************************************
@@ -331,6 +334,7 @@ null_pwm::set_duty_ns(unsigned ns)
 bool
 null_pwm::get_json_config(Json::Value& n)
 {
-    return false;
+    n["type"] = Json::Value("null");
+    return true;
 }
 

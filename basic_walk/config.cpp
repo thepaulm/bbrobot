@@ -5,6 +5,7 @@
 
 /* c headers */
 #include <stdlib.h>
+#include <stdio.h>
 
 /* my headers */
 #include "config.h"
@@ -118,18 +119,28 @@ fail:
 }
 
 bool
-create_arm_config(struct config_arm *cfga, Json::Value& c)
+create_arm_config(struct config_arm *cfga, Json::Value& arms, const char *name)
 {
+    Json::Value jname = Json::Value(Json::objectValue);
+    Json::Value servos = Json::Value(Json::objectValue);
+
     Json::Value t = Json::Value(Json::objectValue);
     t["high_us"] = Json::Value(cfga->high_us);
     t["low_us"] = Json::Value(cfga->low_us);
+    cfga->top->get_json_config(t);
 
     Json::Value b = Json::Value(Json::objectValue);
     b["forward_us"] = Json::Value(cfga->forward_us);
     b["backward_us"] = Json::Value(cfga->backward_us);
+    cfga->bottom->get_json_config(b);
 
-    c["top"] = t;
-    c["bottom"] = b;
+    servos["top"] = t;
+    servos["bottom"] = b;
+
+    jname["servos"] = servos;
+
+    arms[name] = jname;
+
     return true;
 }
 
@@ -140,19 +151,29 @@ write_config_file(struct config *cfg)
     Json::Value root;
     Json::Value n = Json::Value(Json::objectValue);
 
-    create_arm_config(&cfg->left_front, n);
-    root["servos"] = n;
-    /*
-    create_arm_config(&cfg->left_front, arms["left-front"]);
-    Json::Value foo;
-    arms["foo"] = foo;
-    */
-    /*
-    arms["right-front"] = create_arm_config(&cfg->right_front);
-    arms["left-back"] = create_arm_config(&cfg->left_back);
-    arms["right-back"] = create_arm_config(&cfg->right_back);
-    */
+    create_arm_config(&cfg->left_front, n, "left-front");
+    create_arm_config(&cfg->right_front, n, "right-front");
+    create_arm_config(&cfg->left_back, n, "left-back");
+    create_arm_config(&cfg->right_back, n, "right-back");
+    root["arms"] = n;
 
-    cout << root;
-    return false;
+    const char *homedir = getenv("HOME");
+    string filename = homedir + string("/") + string(CONFIG_FILE);
+    string tmpfile = homedir + string("/.") + string(CONFIG_FILE) +
+                     string(".save");
+
+    ofstream fout;
+    fout.open(tmpfile.c_str());
+    if (!fout) {
+        cerr << "Failed to open " + tmpfile + " for writing." << endl;
+        fout.close();
+        return false;
+    }
+
+    fout << root;
+    fout.close();
+
+    rename(tmpfile.c_str(), filename.c_str());
+
+    return true;
 }

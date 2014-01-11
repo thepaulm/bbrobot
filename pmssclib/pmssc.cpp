@@ -173,3 +173,12 @@ pmssc::start()
     cout << "send set param 1 << 6" << endl;
     return send_servo_cmd(SET_PARAM, 1 << 6);
 }
+
+bool
+pmssc::get_json_config(Json::Value& n)
+{
+    n["type"] = Json::Value("pmssc");
+    n["path"] = Json::Value(device_path);
+    n["number"] = Json::Value(servo_num);
+    return true;
+}
