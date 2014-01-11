@@ -43,7 +43,7 @@ load_native_pwm(unsigned p, unsigned pin)
     pwm *pret = NULL;
     string *path;
     path = find_dir_for_pwm(p, pin);
-    pret = new native_pwm(*path);
+    pret = new native_pwm(*path, p, pin);
     delete path;
     return pret;
 }
@@ -157,8 +157,10 @@ pwm::get_us_swing_delay_ns(unsigned ns)
  ****************************************************************************/
 
 /* initialization */
-native_pwm::native_pwm(const std::string path)
+native_pwm::native_pwm(const std::string path, unsigned bank, unsigned pin)
 : path(path)
+, bank(bank)
+, pin(pin)
 {
 }
 
@@ -242,6 +244,12 @@ native_pwm::start()
     write_file_value("run", 1);
 }
 
+bool
+native_pwm::get_json_config(Json::Value& n)
+{
+    return false;
+}
+
 /****************************************************************************
 
     pmssc_pwm methods
@@ -301,6 +309,12 @@ pmssc_pwm::ok()
     return ssc->ok();
 }
 
+bool
+pmssc_pwm::get_json_config(Json::Value& n)
+{
+    return false;
+}
+
 /***************************************************************************
 
   null_pwm methods
@@ -312,5 +326,11 @@ null_pwm::set_duty_ns(unsigned ns)
     int delay = get_us_swing_delay_ns(ns);
     duty_ns = ns;
     return delay;
+}
+
+bool
+null_pwm::get_json_config(Json::Value& n)
+{
+    return false;
 }
 

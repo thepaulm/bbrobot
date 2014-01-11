@@ -4,6 +4,7 @@
 #include "pwm.h"
 #include "gpio.h"
 #include "scheduler.h"
+#include "config.h"
 
 enum ARM_TYPE { LEFT = 1, RIGHT = 2, FRONT = 4, BACK = 8};
 
@@ -19,7 +20,9 @@ public:
 class arm : public schedule_item
 {
 public:
-    arm(pwm *top, pwm *bottom, int flags);
+    arm(pwm *top, pwm *bottom,
+        unsigned high_us, unsigned low_us,
+        unsigned forward_us, unsigned backward_us, int flags);
     ~arm();
 
     void connect();
@@ -53,16 +56,18 @@ public:
     void save_up_state();
     void save_down_state();
 
+    struct config_arm *get_arm_config();
+
 private:
     pwm *top;
     pwm *bottom;
     int flags;
     int state;
 
-    unsigned high;
-    unsigned low;
-    unsigned forward;
-    unsigned backward;
+    unsigned high_us;
+    unsigned low_us;
+    unsigned forward_us;
+    unsigned backward_us;
 
     arm_completion_handler *comp;
 

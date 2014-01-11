@@ -2,38 +2,22 @@
 #include "arm.h"
 #include "arm_sweep_delegate.h"
 
-#define LEG_HIGH 55
-#define LEG_LOW 65
-#define ARM_FORWARD 60
-#define ARM_BACKWARD 40
-
 using namespace std;
 
 /* Arm */
-arm::arm(pwm *top, pwm *bottom, int flags)
+arm::arm(pwm *top, pwm *bottom,
+         unsigned high_us, unsigned low_us,
+         unsigned forward_us, unsigned backward_us, int flags)
 : top(top)
 , bottom(bottom)
+, high_us(high_us)
+, low_us(low_us)
+, forward_us(forward_us)
+, backward_us(backward_us)
 , flags(flags)
 , state(0)
 , comp(NULL)
 {
-    if (((flags & RIGHT) && (flags & FRONT)) ||
-        ((flags & LEFT)  && (flags & BACK))) {
-        high = 100 - LEG_HIGH;
-        low = 100 - LEG_LOW;
-    } else {
-        high = LEG_HIGH;
-        low = LEG_LOW;
-    }
-
-    if (flags & LEFT) {
-        forward = ARM_FORWARD;
-        backward = ARM_BACKWARD;
-    } else {
-        forward = 100 - ARM_FORWARD;
-        backward = 100 - ARM_BACKWARD;
-    }
-
     /* this guy is here to handle the fire commands for the sweep action */
     sweeper = new arm_sweep_delegate(this);
 }
@@ -48,43 +32,44 @@ arm::~arm()
 void
 arm::save_forward_state()
 {
-    cout << "setting forward from " << forward;
-    forward = bottom->get_duty_pct();
-    cout << " to " << forward << endl;
+    cout << "setting forward from " << forward_us;
+    forward_us = bottom->get_duty_us();
+    cout << " to " << forward_us << endl;
 }
 
 void
 arm::save_backward_state()
 {
-    cout << "setting backward from " << backward;
-    backward = bottom->get_duty_pct();
-    cout << " to " << backward << endl;
+    cout << "setting backward from " << backward_us;
+    backward_us = bottom->get_duty_us();
+    cout << " to " << backward_us << endl;
 }
 
 void
 arm::save_up_state()
 {
-    cout << "setting up state from " << high;
-    high = top->get_duty_pct();
-    cout << " to " << high << endl;
+    cout << "setting up state from " << high_us;
+    high_us = top->get_duty_us();
+    cout << " to " << high_us << endl;
 }
 
 void
 arm::save_down_state()
 {
-    cout << "setting down state from " << low;
-    low = top->get_duty_pct();
-    cout << " to " << low << endl;
+    cout << "setting down state from " << low_us;
+    low_us = top->get_duty_us();
+    cout << " to " << low_us << endl;
 }
 
 void
 arm::connect()
 {
+    /* Set these to a neutral position half way through the sweep */
+    top->set_duty_us((low_us + high_us) / 2);
+    request_standing();
+
     top->connect();
     bottom->connect();
-
-    request_backward();
-    request_down();
 }
 
 void
@@ -203,29 +188,43 @@ arm::cycle_backward(scheduler *sched, arm_completion_handler *c)
 int
 arm::request_forward()
 {
-    return bottom->set_duty_pct(forward);
+    return bottom->set_duty_us(forward_us);
 }
 
 int
 arm::request_backward()
 {
-    return bottom->set_duty_pct(backward);
+    return bottom->set_duty_us(backward_us);
 }
 
 int
 arm::request_standing()
 {
-    return bottom->set_duty_pct((forward + backward) / 2);
+    return bottom->set_duty_us((forward_us + backward_us) / 2);
 }
 
 int
 arm::request_up()
 {
-    return top->set_duty_pct(high);
+    return top->set_duty_us(high_us);
 }
 
 int
 arm::request_down()
 {
-    return top->set_duty_pct(low);
+    return top->set_duty_us(low_us);
 }
+
+struct config_arm *
+arm::get_arm_config()
+{
+    struct config_arm *cfg = new struct config_arm;
+    cfg->top = top;
+    cfg->bottom = bottom;
+    cfg->high_us = high_us;
+    cfg->low_us = low_us;
+    cfg->forward_us = forward_us;
+    cfg->backward_us = backward_us;
+    return cfg;
+}
+

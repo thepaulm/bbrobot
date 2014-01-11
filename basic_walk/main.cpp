@@ -71,10 +71,24 @@ load_gpio_for_config(struct gpio_config *pconf)
     return load_gpio(pconf->p, pconf->pin);
 }
 
+arm *
+load_arm_from_config(struct config_arm *cfga, int flags)
+{
+   return new arm(cfga->top,
+                  cfga->bottom,
+                  cfga->high_us,
+                  cfga->low_us,
+                  cfga->forward_us,
+                  cfga->backward_us,
+                  LEFT | FRONT);
+}
+
 int
 main(int argc, char *argv[])
 {
     config *cfg = read_config_file();
+    if (!cfg)
+        return -1;
 
     gpio *gpios[5];
     for (int i = 0; i < 5; i++) {
@@ -88,24 +102,20 @@ main(int argc, char *argv[])
 
     spine = new nervous_system(
                                /* Left front arm */
-                               new arm(cfg->left_front.top,
-                                       cfg->left_front.bottom, LEFT | FRONT),
-                               gpios[0],
+                               load_arm_from_config(&cfg->left_front,
+                                                   LEFT | FRONT), gpios[0],
 
                                /* Right front arm */
-                               new arm(cfg->right_front.top,
-                                       cfg->right_front.bottom, RIGHT | FRONT),
-                               gpios[1],
+                               load_arm_from_config(&cfg->right_front,
+                                                    RIGHT | FRONT), gpios[1],
 
                                /* Left back leg */
-                               new arm(cfg->left_back.top,
-                                       cfg->left_back.bottom, LEFT | BACK),
-                               gpios[2],
+                               load_arm_from_config(&cfg->left_back,
+                                                    LEFT | BACK), gpios[2],
 
                                /* Right back leg */
-                               new arm(cfg->right_back.top,
-                                       cfg->right_back.bottom, RIGHT | BACK),
-                               gpios[3],
+                               load_arm_from_config(&cfg->right_back,
+                                                    RIGHT | BACK), gpios[3],
 
                                /* Vacuum pump */
                                gpios[4]

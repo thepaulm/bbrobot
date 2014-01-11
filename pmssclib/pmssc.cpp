@@ -20,6 +20,7 @@ pmssc::pmssc(const std::string device_path, uint8_t servo_num)
 : device_path(device_path)
 , servo_num(servo_num)
 , device(NULL)
+, connected(false)
 {
 }
 
@@ -63,7 +64,7 @@ pmssc::configure_device()
     return true;
 }
 
-/* This is the global cash of open ofstreams. */
+/* This is the global cache of open ofstreams. */
 unordered_map<string, ofstream*>open_devices;
 
 bool
@@ -88,6 +89,7 @@ pmssc::connect()
         return false;
     }
 
+    connected = true;
     return start();
 }
 
@@ -101,6 +103,8 @@ pmssc::ok()
 bool
 pmssc::send_servo_cmd(uint8_t cmd, uint8_t d)
 {
+    if (!connected)
+        return false;
     uint8_t data[5];
     data[0] = 0x80;
     data[1] = 0x01;
@@ -116,6 +120,8 @@ pmssc::send_servo_cmd(uint8_t cmd, uint8_t d)
 bool
 pmssc::send_servo_cmd(uint8_t cmd, uint8_t d1, uint8_t d2)
 {
+    if (!connected)
+        return false;
     uint8_t data[6];
     data[0] = 0x80;
     data[1] = 0x01;

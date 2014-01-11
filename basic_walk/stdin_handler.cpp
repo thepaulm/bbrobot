@@ -8,6 +8,7 @@
 #include "stdin_handler.h"
 #include "scheduler.h"
 #include "nervous_system.h"
+#include "config.h"
 
 using namespace std;
 
@@ -139,6 +140,27 @@ stdin_handler::dec_servo(int num)
     spine->lbvalve->f();                                                    \
     spine->rbvalve->f();
 
+struct config *
+config_from_spine(nervous_system *s)
+{
+    struct config_arm *c;
+    struct config *cfg = new struct config;
+
+    c = spine->left_arm->get_arm_config();
+    cfg->left_front = *c;
+    delete c;
+    c = spine->right_arm->get_arm_config();
+    cfg->right_front = *c;
+    delete c;
+    c = spine->left_leg->get_arm_config();
+    cfg->left_back = *c;
+    delete c;
+    c = spine->right_leg->get_arm_config();
+    cfg->right_back = *c;
+    delete c; 
+    return cfg;
+}
+
 void
 stdin_handler::run_callibration()
 {
@@ -156,6 +178,7 @@ stdin_handler::run_callibration()
                 break;
             if (c == ' ') {
                 cout << "Callibration complete." << endl;
+                write_config_file(config_from_spine(spine));
                 return;
             }
         }

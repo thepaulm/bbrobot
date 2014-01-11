@@ -15,32 +15,62 @@
 
 using namespace std;
 
-void
-create_config_servo(pwm **pppwm, unsigned *pmin, unsigned *pmax,
-                    Json::Value& val)
+bool
+create_config_servo(pwm **pppwm, Json::Value& val)
 {
+    if (!val.isMember("type")) {
+        cerr << "servo has no type: " << val << endl;
+        return false;
+    }
     if (val["type"] == "pmssc") {
         *pppwm = load_pmssc_pwm(val["path"].asString(), val["number"].asInt());
     } else if (val["type"] == "native") {
         *pppwm = load_native_pwm(val["bank"].asInt(), val["pin"].asInt());
+    } else if (val["type"] == "null") {
+        *pppwm = load_null_pwm();
+    } else {
+        cerr << "servo has unknown type: " << val << endl;
+        return false;
     }
-    *pmin = val["min_pwm_us"].asInt();
-    *pmax = val["max_pwm_us"].asInt();
+    return true;
 }
 
-void
+bool
 create_config_arm(struct config_arm *cfga, Json::Value arms, const char *name)
 {
+    if (!arms.isMember(name)) {
+        cerr << "Failed to find arms." << name << " in config file." << endl;
+        return false;
+    }
     Json::Value named = arms[name];
+
+    if (!named.isMember("servos")) {
+        cerr << "Failed to find arms." << name << ".servos in config file."
+             << endl;
+        return false;
+    }
     Json::Value servos = named["servos"];
 
-    create_config_servo(&cfga->top, &cfga->top_min_pwm_us,
-                                    &cfga->top_max_pwm_us,
-                                    servos["top"]);
+    if (!servos.isMember("top")) {
+        cerr << "Failed to find arms." << name << ".servos.top in config file."
+             << endl;
+        return false;
+    }
+    create_config_servo(&cfga->top, servos["top"]);
+    cfga->high_us = servos["top"]["high_us"].asInt();
+    cfga->low_us = servos["top"]["low_us"].asInt();
 
-    create_config_servo(&cfga->bottom, &cfga->bottom_min_pwm_us,
-                                       &cfga->bottom_max_pwm_us,
-                                       servos["bottom"]);
+    if (!servos.isMember("bottom")) {
+        cerr << "Failed to find arms." << name << ".servos.bottom in config "
+                "file." << endl;
+        return false;
+    }
+
+    create_config_servo(&cfga->bottom, servos["bottom"]);
+    cfga->forward_us = servos["bottom"]["forward_us"].asInt();
+    cfga->backward_us = servos["bottom"]["backward_us"].asInt();
+
+    return true;;
 }
 
 config *
@@ -54,6 +84,7 @@ read_config_file()
     cout << "Reading config file: " << filename << endl;
     Json::Value root;
     Json::Reader jread;
+    Json::Value arms;
 
     if (!jread.parse(ifile, root)) {
         cerr << "Failed to read config file!" << endl;
@@ -64,12 +95,64 @@ read_config_file()
     ifile.close();
 
     config *cfg = new config;
-    Json::Value arms = root["arms"];
+    if (!root.isMember("arms")) {
+        cerr << "Found no \"arms\" section in config file." << endl;
+        goto fail;
+    }
+    arms = root["arms"];
 
-    create_config_arm(&cfg->left_front, arms, "left-front");
-    create_config_arm(&cfg->right_front, arms, "right-front");
-    create_config_arm(&cfg->left_back, arms, "left-back");
-    create_config_arm(&cfg->right_back, arms, "right-back");
+    if (!create_config_arm(&cfg->left_front, arms, "left-front"))
+        goto fail;
+    if (!create_config_arm(&cfg->right_front, arms, "right-front"))
+        goto fail;
+    if (!create_config_arm(&cfg->left_back, arms, "left-back"))
+        goto fail;
+    if (!create_config_arm(&cfg->right_back, arms, "right-back"))
+        goto fail;
 
     return cfg;
+
+fail:
+    delete cfg;
+    return NULL;
+}
+
+bool
+create_arm_config(struct config_arm *cfga, Json::Value& c)
+{
+    Json::Value t = Json::Value(Json::objectValue);
+    t["high_us"] = Json::Value(cfga->high_us);
+    t["low_us"] = Json::Value(cfga->low_us);
+
+    Json::Value b = Json::Value(Json::objectValue);
+    b["forward_us"] = Json::Value(cfga->forward_us);
+    b["backward_us"] = Json::Value(cfga->backward_us);
+
+    c["top"] = t;
+    c["bottom"] = b;
+    return true;
+}
+
+bool
+write_config_file(struct config *cfg)
+{
+    // write out the tmp file then call rename to slot it in place
+    Json::Value root;
+    Json::Value n = Json::Value(Json::objectValue);
+
+    create_arm_config(&cfg->left_front, n);
+    root["servos"] = n;
+    /*
+    create_arm_config(&cfg->left_front, arms["left-front"]);
+    Json::Value foo;
+    arms["foo"] = foo;
+    */
+    /*
+    arms["right-front"] = create_arm_config(&cfg->right_front);
+    arms["left-back"] = create_arm_config(&cfg->left_back);
+    arms["right-back"] = create_arm_config(&cfg->right_back);
+    */
+
+    cout << root;
+    return false;
 }

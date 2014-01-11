@@ -6,11 +6,11 @@
 struct config_arm
 {
     pwm *top;
-    unsigned top_min_pwm_us;
-    unsigned top_max_pwm_us;
+    unsigned high_us;
+    unsigned low_us;
     pwm *bottom;
-    unsigned bottom_min_pwm_us;
-    unsigned bottom_max_pwm_us;
+    unsigned forward_us;
+    unsigned backward_us;
 };
 
 struct config
@@ -22,5 +22,6 @@ struct config
 };
 
 config *read_config_file();
+bool write_config_file(struct config *);
 
 #endif /* _CONFIG_H */

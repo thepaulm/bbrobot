@@ -30,7 +30,7 @@ private:
     std::string device_path;
     std::ofstream *device;
     uint8_t servo_num;
-
+    bool connected;
 };
 
 #endif /* _PMSSC_H */

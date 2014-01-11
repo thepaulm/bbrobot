@@ -3,6 +3,7 @@
 
 #include <string>
 #include "pmssc.h"
+#include "json/json.h"
 
 class pwm
 {
@@ -17,6 +18,7 @@ public:
 
     virtual void stop() = 0;
     virtual void start() = 0;
+    virtual bool get_json_config(Json::Value& n) = 0;
 
     /* Here is what we provide */
 
@@ -51,7 +53,7 @@ protected:
 class native_pwm : public pwm
 {
 public:
-    native_pwm(const std::string path);
+    native_pwm(const std::string path, unsigned bank, unsigned pin);
     ~native_pwm();
     bool connect();
     int set_duty_ns(unsigned);
@@ -59,9 +61,13 @@ public:
     void start();
     void stop();
 
+    bool get_json_config(Json::Value& n);
+
 private:
     std::string path;
     bool write_file_value(std::string file, unsigned value);
+    unsigned bank;
+    unsigned pin;
 };
 
 class pmssc_pwm : public pwm
@@ -77,9 +83,10 @@ public:
 
     bool ok();
 
+    bool get_json_config(Json::Value& n);
+
 private:
     pmssc *ssc;
-
 };
 
 class null_pwm : public pwm
@@ -93,6 +100,8 @@ public:
     void start() {}
     void stop() {}
     bool ok() {return true;}
+
+    bool get_json_config(Json::Value& n);
 };
 
 pwm *load_native_pwm(unsigned p, unsigned pin);
