@@ -26,8 +26,9 @@ if arch == 'arm':
 
 if arch == 'intel':
     env.Append(CCFLAGS = '-g')
+else:
+    env.Append(CXXFLAGS = '-O2')
 
-env.Append(CXXFLAGS = '-O2')
 env.Append(CXXFLAGS = '-std=c++0x')
 
 env['BUILDERS']['CTags'] = Builder(action=ctags_binpath + ' -R --exclude=build')

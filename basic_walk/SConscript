@@ -33,6 +33,7 @@ libenv = env.Clone()
 
 compile_library(libenv, 'eiolib')
 compile_library(libenv, 'pmssclib')
+compile_library(libenv, 'libjson')
 
 #compile_library(env, 'libjson',
 #                srcdir='../../../jsoncpp-src-0.5.0/src/lib_json/',

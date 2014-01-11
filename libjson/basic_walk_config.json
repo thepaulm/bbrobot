@@ -1,0 +1,93 @@
+// basic_walk configuration file
+{
+    "arms" : {
+
+        "left-front" : {
+
+            "servos" : {
+
+                "top" : {
+                    "type" : "pmssc",
+                    "path" : "/dev/ttyO4",
+                    "number" : 0,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                },
+
+                "bottom" :  {
+                    "type" : "pmssc",
+                    "path" : "/dev/ttyO4",
+                    "number" : 1,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 }
+            }
+        },
+
+        "right-front" : {
+
+            "servos" : {
+
+                "top" : {
+                    "type" : "pmssc",
+                    "path" : "/dev/ttyO4",
+                    "number" : 2,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 },
+
+                "bottom" : {
+                    "type" : "pmssc",
+                    "path" : "/dev/ttyO4",
+                    "number" : 3,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 }
+             }
+         },
+
+         "left-back" : {
+
+            "servos" : {
+
+                "top" : {
+                    "type" : "native",
+                    "bank" : 8,
+                    "pin"  : 19,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 },
+
+                "bottom" : {
+                    "type" : "native",
+                    "bank" : 9,
+                    "pin" : 16,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 }
+             }
+         },
+
+         "right-back" : {
+
+            "servos" : {
+
+                "top" : {
+                    "type" : "native",
+                    "bank" : 9,
+                    "pin"  : 14,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 },
+
+                "bottom" : {
+                    "type" : "native",
+                    "bank" : 8,
+                    "pin" : 13,
+                    "min_pwm_us" : 1000,
+                    "max_pwm_us" : 2000
+                 }
+             }
+         }
+     }
+}

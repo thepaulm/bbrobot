@@ -19,6 +19,9 @@ find_dir_for_gpio(unsigned p, unsigned pin)
 
     /* Glob for the path */
     std::string *path = find_ocp_dir_for_glob("gpio-P%d.%d_gpio*", p, pin);
+    if (*path == "")
+        return path;
+
     const char *cstr = path->c_str();
     const char *pnumloc = strstr(cstr, "_gpio");
 

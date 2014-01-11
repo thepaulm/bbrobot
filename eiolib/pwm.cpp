@@ -39,10 +39,10 @@ find_dir_for_pwm(unsigned p, unsigned pin)
 pwm *
 load_native_pwm(unsigned p, unsigned pin)
 {
+    cout << "load_native_pwm: " << p << " : " << pin << endl;
     pwm *pret = NULL;
     string *path;
     path = find_dir_for_pwm(p, pin);
-    cout << "found my path:" << *path << endl;
     pret = new native_pwm(*path);
     delete path;
     return pret;
@@ -51,6 +51,7 @@ load_native_pwm(unsigned p, unsigned pin)
 pwm *
 load_pmssc_pwm(const std::string device_path, unsigned servo_num)
 {
+    cout << "load_pmssc_pwm: " << device_path << " : " << servo_num << endl;
     pmssc_pwm *p = new pmssc_pwm(device_path, servo_num);
     if (!p->ok()) {
         delete p;

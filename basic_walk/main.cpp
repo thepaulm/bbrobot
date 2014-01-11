@@ -16,61 +16,9 @@
 #include "arm.h"
 #include "stdin_handler.h"
 #include "nervous_system.h"
+#include "config.h"
 
 using namespace std;
-
-/* ----------------- Configuration of Servos --------------------------- */
-struct ssc_config
-{
-    const char *path;
-    unsigned num;
-};
-
-struct native_config
-{
-    unsigned bank;
-    unsigned pin;
-};
-
-enum pwm_type {NONE, SSC, NATIVE};
-struct pwm_config
-{
-    enum pwm_type type;
-    union {
-        struct ssc_config ssc;
-        struct native_config native;
-    } data;
-
-    pwm_config(const char *path, int num)
-    : type(SSC)
-    {
-        data.ssc.path = path;
-        data.ssc.num = num;
-    }
-
-    pwm_config(int bank, int pin)
-    : type(NATIVE)
-    {
-        data.native.bank = bank;
-        data.native.pin = pin;
-        if (bank == 0 && pin == 0) {
-            type = NONE;
-        }
-    }
-};
-
-struct pwm_config config[] =
-{
-    {"/dev/ttyO4", 0},              //0
-    {"/dev/ttyO4", 1},              //1
-    {"/dev/ttyO4", 2},              //2
-    {"/dev/ttyO4", 3},              //3
-    {8, 19},                        //4
-    {9, 16},                        //5
-    {9, 14},                        //6
-    {8, 13},                        //7
-    {0, 0}
-};
 
 /* ----------------- Configuration of Solenoids ------------------------- */
 struct gpio_config
@@ -117,23 +65,6 @@ setup_exits()
     signal(SIGINT, sigexit);
 }
 
-pwm *
-load_pwm_for_config(struct pwm_config *pconf)
-{
-    cout << __FUNCTION__ << endl;
-    if (pconf->type == SSC) {
-        cout << "loading ssc pwm " << pconf->data.ssc.path << ":"
-             << pconf->data.ssc.num << endl;
-        return load_pmssc_pwm(pconf->data.ssc.path, pconf->data.ssc.num);
-    } else if (pconf->type == NATIVE) {
-        cout << "loading native pwm " << pconf->data.native.bank << ":"
-             << pconf->data.native.pin << endl;
-        return load_native_pwm(pconf->data.native.bank, pconf->data.native.pin);
-    } else {
-        return load_null_pwm();
-    }
-}
-
 gpio *
 load_gpio_for_config(struct gpio_config *pconf)
 {
@@ -143,33 +74,9 @@ load_gpio_for_config(struct gpio_config *pconf)
 int
 main(int argc, char *argv[])
 {
-    pwm *pwms[8];
+    config *cfg = read_config_file();
+
     gpio *gpios[5];
-    memset(pwms, 0, sizeof(pwm *) * 8);
-
-    /* If we have command line arguments, we assume they are integers
-       representing which servos should be turned on. If no command line
-       arguments then we run all servos */
-    if (argc > 1) {
-        for (int i = 1; i < argc; i++) {
-            int c = atoi(argv[i]);
-            if (c < 8) {
-                pwms[c] = load_pwm_for_config(&config[c]);
-            } else {
-                cout << c << " too high!" << endl;
-                return -1;
-            }
-        }
-        for (int i = 0; i < 8; i++) {
-            if (!pwms[i])
-                pwms[i] = load_null_pwm();
-        }
-    } else {
-        for (int i = 0; i < 8; i++) {
-            pwms[i] = load_pwm_for_config(&config[i]);
-        }
-    }
-
     for (int i = 0; i < 5; i++) {
         gpios[i] = load_gpio_for_config(&config_gpio[i]);
     }
@@ -181,24 +88,30 @@ main(int argc, char *argv[])
 
     spine = new nervous_system(
                                /* Left front arm */
-                               new arm(pwms[1], pwms[0], LEFT | FRONT),
+                               new arm(cfg->left_front.top,
+                                       cfg->left_front.bottom, LEFT | FRONT),
                                gpios[0],
 
                                /* Right front arm */
-                               new arm(pwms[3], pwms[2], RIGHT | FRONT),
+                               new arm(cfg->right_front.top,
+                                       cfg->right_front.bottom, RIGHT | FRONT),
                                gpios[1],
 
                                /* Left back leg */
-                               new arm(pwms[5], pwms[4], LEFT | BACK),
+                               new arm(cfg->left_back.top,
+                                       cfg->left_back.bottom, LEFT | BACK),
                                gpios[2],
 
                                /* Right back leg */
-                               new arm(pwms[7], pwms[6], RIGHT | BACK),
+                               new arm(cfg->right_back.top,
+                                       cfg->right_back.bottom, RIGHT | BACK),
                                gpios[3],
 
                                /* Vacuum pump */
                                gpios[4]
                                );
+
+    delete cfg;
 
     spine->connect();
 
