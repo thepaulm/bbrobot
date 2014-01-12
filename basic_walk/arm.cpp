@@ -200,6 +200,7 @@ arm::request_backward()
 int
 arm::request_standing()
 {
+    request_down();
     return bottom->set_duty_us((forward_us + backward_us) / 2);
 }
 

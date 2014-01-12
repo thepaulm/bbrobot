@@ -54,38 +54,37 @@ stdin_handler::reset()
 void
 stdin_handler::inc_servo(int num)
 {
-    cout << "inc servo " << num << endl;
     switch (num) {
         case 0:
-            spine->left_arm->inc_bottom();
-            break;
-
-        case 1:
             spine->left_arm->inc_top();
             break;
 
-        case 2:
-            spine->right_arm->inc_bottom();
+        case 1:
+            spine->left_arm->inc_bottom();
             break;
 
-        case 3:
+        case 2:
             spine->right_arm->inc_top();
             break;
 
-        case 4:
-            spine->left_leg->inc_bottom();
+        case 3:
+            spine->right_arm->inc_bottom();
             break;
 
-        case 5:
+        case 4:
             spine->left_leg->inc_top();
             break;
 
+        case 5:
+            spine->left_leg->inc_bottom();
+            break;
+
         case 6:
-            spine->right_leg->inc_bottom();
+            spine->right_leg->inc_top();
             break;
 
         case 7:
-            spine->right_leg->inc_top();
+            spine->right_leg->inc_bottom();
             break;
     }
 }
@@ -95,35 +94,35 @@ stdin_handler::dec_servo(int num)
 {
     switch (num) {
         case 0:
-            spine->left_arm->dec_bottom();
-            break;
-
-        case 1:
             spine->left_arm->dec_top();
             break;
 
-        case 2:
-            spine->right_arm->dec_bottom();
+        case 1:
+            spine->left_arm->dec_bottom();
             break;
 
-        case 3:
+        case 2:
             spine->right_arm->dec_top();
             break;
 
-        case 4:
-            spine->left_leg->dec_bottom();
+        case 3:
+            spine->right_arm->dec_bottom();
             break;
 
-        case 5:
+        case 4:
             spine->left_leg->dec_top();
             break;
 
+        case 5:
+            spine->left_leg->dec_bottom();
+            break;
+
         case 6:
-            spine->right_leg->dec_bottom();
+            spine->right_leg->dec_top();
             break;
 
         case 7:
-            spine->right_leg->dec_top();
+            spine->right_leg->dec_bottom();
             break;
     }
 }
@@ -177,8 +176,13 @@ stdin_handler::run_callibration()
             if (m == 'f' || m == 'b' || m == 'u' || m == 'd')
                 break;
             if (c == ' ') {
-                cout << "Callibration complete." << endl;
+                cout << "Callibration complete, not saving." << endl;
+                return;
+            }
+            if (c == 's') {
+                cout << "Callibration complete, saving ..." << endl;
                 write_config_file(config_from_spine(spine));
+                cout << "Save complete." << endl;
                 return;
             }
         }

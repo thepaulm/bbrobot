@@ -1,93 +1,94 @@
-// basic_walk configuration file
+
 {
-    "arms" : {
-
-        "left-front" : {
-
-            "servos" : {
-
-                "top" : {
-                    "type" : "pmssc",
-                    "path" : "/dev/ttyO4",
-                    "number" : 0,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                },
-
-                "bottom" :  {
-                    "type" : "pmssc",
-                    "path" : "/dev/ttyO4",
-                    "number" : 1,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 }
-            }
-        },
-
-        "right-front" : {
-
-            "servos" : {
-
-                "top" : {
-                    "type" : "pmssc",
-                    "path" : "/dev/ttyO4",
-                    "number" : 2,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 },
-
-                "bottom" : {
-                    "type" : "pmssc",
-                    "path" : "/dev/ttyO4",
-                    "number" : 3,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 }
-             }
-         },
-
-         "left-back" : {
-
-            "servos" : {
-
-                "top" : {
-                    "type" : "native",
-                    "bank" : 8,
-                    "pin"  : 19,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 },
-
-                "bottom" : {
-                    "type" : "native",
-                    "bank" : 9,
-                    "pin" : 16,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 }
-             }
-         },
-
-         "right-back" : {
-
-            "servos" : {
-
-                "top" : {
-                    "type" : "native",
-                    "bank" : 9,
-                    "pin"  : 14,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 },
-
-                "bottom" : {
-                    "type" : "native",
-                    "bank" : 8,
-                    "pin" : 13,
-                    "min_pwm_us" : 1000,
-                    "max_pwm_us" : 2000
-                 }
-             }
-         }
-     }
+	"arms" : 
+	{
+		"left-back" : 
+		{
+			"servos" : 
+			{
+				"bottom" : 
+				{
+					"backward_us" : 1370,
+					"bank" : 8,
+					"forward_us" : 1690,
+					"pin" : 19,
+					"type" : "native"
+				},
+				"top" : 
+				{
+					"bank" : 9,
+					"high_us" : 1490,
+					"low_us" : 1300,
+					"pin" : 16,
+					"type" : "native"
+				}
+			}
+		},
+		"left-front" : 
+		{
+			"servos" : 
+			{
+				"bottom" : 
+				{
+					"backward_us" : 1240,
+					"forward_us" : 1510,
+					"number" : 2,
+					"path" : "/dev/ttyO4",
+					"type" : "pmssc"
+				},
+				"top" : 
+				{
+					"high_us" : 1710,
+					"low_us" : 1840,
+					"number" : 1,
+					"path" : "/dev/ttyO4",
+					"type" : "pmssc"
+				}
+			}
+		},
+		"right-back" : 
+		{
+			"servos" : 
+			{
+				"bottom" : 
+				{
+					"backward_us" : 1750,
+					"bank" : 9,
+					"forward_us" : 1450,
+					"pin" : 14,
+					"type" : "native"
+				},
+				"top" : 
+				{
+					"bank" : 8,
+					"high_us" : 1430,
+					"low_us" : 1640,
+					"pin" : 13,
+					"type" : "native"
+				}
+			}
+		},
+		"right-front" : 
+		{
+			"servos" : 
+			{
+				"bottom" : 
+				{
+					"backward_us" : 1610,
+					"forward_us" : 1360,
+					"number" : 0,
+					"path" : "/dev/ttyO4",
+					"type" : "pmssc"
+				},
+				"top" : 
+				{
+					"high_us" : 1440,
+					"low_us" : 1300,
+					"number" : 3,
+					"path" : "/dev/ttyO4",
+					"type" : "pmssc"
+				}
+			}
+		}
+	}
 }
