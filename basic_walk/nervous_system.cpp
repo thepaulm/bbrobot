@@ -60,6 +60,19 @@ nervous_system::arms_busy()
             left_leg->busy() || right_leg->busy());
 }
 
+/* Valves fire across the body. Normally they are either rf+lb, or lf+rb. This
+   is the way that the plumbing is hooked up. The front valves control the
+   negative, and the back valves control the positive for the OPPOSITE side.
+
+   rf + lb = right front and left back are negative pressure, left front and
+             right back are positive pressure.
+   lf + rb = left front and right back are negative pressure, right front and
+             left back are positive pressure.
+
+   If you do both fronts on then everybody is at negative pressure. If you
+   do both backs on then everybody is positive pressure. Do not maintain
+   these situations for a long time as you will overwhelm the pump. */ 
+
 void
 nervous_system::pump_left()
 {
@@ -77,6 +90,15 @@ nervous_system::pump_right()
     lbvalve->on();
 
     lfvalve->off();
+    rbvalve->off();
+}
+
+void
+nervous_system::pump_both()
+{
+    lfvalve->on();
+    rfvalve->on();
+    lbvalve->off();
     rbvalve->off();
 }
 
@@ -99,6 +121,7 @@ nervous_system::walking(scheduler *sched)
         case 2:
             {
                 pump_right();
+                //pump_both();
                 state = 3;
                 sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
             }
@@ -106,6 +129,7 @@ nervous_system::walking(scheduler *sched)
 
         case 3:
             {
+                //pump_right();
                 right_arm->cycle_backward(sched, this);
                 left_arm->cycle_forward(sched, this);
 
@@ -119,6 +143,7 @@ nervous_system::walking(scheduler *sched)
         case 4:
             {
                 pump_left();
+                //pump_both();
                 state = 5;
                 sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
             }
@@ -126,6 +151,7 @@ nervous_system::walking(scheduler *sched)
 
         case 5:
             {
+                //pump_left();
                 right_arm->cycle_forward(sched, this);
                 left_arm->cycle_backward(sched, this);
 

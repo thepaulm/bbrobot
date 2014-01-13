@@ -34,6 +34,7 @@ private:
     std::ofstream *device;
     uint8_t servo_num;
     bool connected;
+    unsigned duty_us;
 };
 
 #endif /* _PMSSC_H */

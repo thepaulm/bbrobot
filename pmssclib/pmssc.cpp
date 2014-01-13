@@ -70,6 +70,8 @@ unordered_map<string, ofstream*>open_devices;
 bool
 pmssc::connect()
 {
+    /* Look for cached device first. We don't want to open this same
+       descriptor multiple times */
     if (open_devices.count(device_path) > 0) {
         cout << "We already have " << device_path << "open." << endl;
         device = open_devices[device_path];
@@ -82,14 +84,17 @@ pmssc::connect()
         }
         cout << "I opened and cached " << device_path << endl;
         open_devices[device_path] = device;
-    }
 
-    if (!configure_device()) {
-        cerr << "Could not configure device " << device_path << endl;
-        return false;
+        if (!configure_device()) {
+            cerr << "Could not configure device " << device_path << endl;
+            return false;
+        }
     }
 
     connected = true;
+    /* Now that we are connected, let's set the duty before we tell the
+       servo to start */
+    set_duty_us(duty_us);
     return start();
 }
 
@@ -148,6 +153,7 @@ pmssc::set_duty_us(unsigned us)
     uint8_t data1, data2;
     data1 = pmssc_tics >> 7;
     data2 = pmssc_tics & ((1 << 7) - 1);
+    duty_us = us;
     return send_servo_cmd(SET_POSITION_ABS, data1, data2);
 }
 

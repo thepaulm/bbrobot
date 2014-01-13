@@ -40,6 +40,7 @@ private:
     void walking(scheduler *);
     void pump_left();
     void pump_right();
+    void pump_both();
 
     bool arms_busy();
 };
