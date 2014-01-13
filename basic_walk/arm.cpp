@@ -65,7 +65,6 @@ void
 arm::connect()
 {
     /* Set these to a neutral position half way through the sweep */
-    top->set_duty_us((low_us + high_us) / 2);
     request_standing();
 
     top->connect();
