@@ -120,8 +120,8 @@ nervous_system::walking(scheduler *sched)
 
         case 2:
             {
-                pump_right();
-                //pump_both();
+                //pump_right();
+                pump_both();
                 state = 3;
                 sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
             }
@@ -129,7 +129,7 @@ nervous_system::walking(scheduler *sched)
 
         case 3:
             {
-                //pump_right();
+                pump_right();
                 right_arm->cycle_backward(sched, this);
                 left_arm->cycle_forward(sched, this);
 
@@ -142,8 +142,8 @@ nervous_system::walking(scheduler *sched)
 
         case 4:
             {
-                pump_left();
-                //pump_both();
+                //pump_left();
+                pump_both();
                 state = 5;
                 sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
             }
@@ -151,7 +151,7 @@ nervous_system::walking(scheduler *sched)
 
         case 5:
             {
-                //pump_left();
+                pump_left();
                 right_arm->cycle_forward(sched, this);
                 left_arm->cycle_backward(sched, this);
 

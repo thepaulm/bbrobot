@@ -14,9 +14,6 @@ using namespace std;
 
 stdin_handler key_handler;
 
-extern arm *left_arm;
-extern arm *right_arm;
-
 void
 stdin_handler::config()
 {
@@ -278,15 +275,15 @@ stdin_handler::fire(scheduler *psched)
                 break;
 
             case 'h':
+                /* Put us in a state right before a walk start */
                 cout << "Hang test." << endl;
-                spine->right_arm->request_standing();
-                spine->left_leg->request_standing();
-                spine->left_arm->request_forward();
+                spine->right_arm->request_forward();
+                spine->left_leg->request_forward();
+
+                spine->left_arm->request_backward();
                 spine->right_leg->request_backward();
-                spine->rfvalve->on();
-                spine->lbvalve->on();
-                spine->lfvalve->off();
-                spine->rbvalve->off();
+
+                spine->pump_left();
                 spine->pump->on();
                 break;
 

@@ -19,6 +19,10 @@ public:
     void walk(scheduler *);
     void stop(scheduler *);
 
+    void pump_left();
+    void pump_right();
+    void pump_both();
+
     void finish(scheduler *, arm *);
     void fire(scheduler *);
 
@@ -38,9 +42,6 @@ public:
 
 private:
     void walking(scheduler *);
-    void pump_left();
-    void pump_right();
-    void pump_both();
 
     bool arms_busy();
 };
