@@ -1,4 +1,5 @@
 #include "nervous_system.h"
+#include "stdin_handler.h"
 
 #define PUMP_SWITCH_DELAY_MS 1000
 
@@ -102,6 +103,8 @@ nervous_system::pump_both()
     rbvalve->off();
 }
 
+#define PUMP_BOTH 1
+
 void
 nervous_system::walking(scheduler *sched)
 {
@@ -111,6 +114,7 @@ nervous_system::walking(scheduler *sched)
     switch (state) {
         case 1:
             {
+                pause_for_key();
                 pump->on();
                 right_arm->cycle_forward(sched, this);
                 left_leg->cycle_forward(sched, this);
@@ -120,8 +124,12 @@ nervous_system::walking(scheduler *sched)
 
         case 2:
             {
-                //pump_right();
+                pause_for_key();
+#if PUMP_BOTH
                 pump_both();
+#else
+                pump_right();
+#endif
                 state = 3;
                 sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
             }
@@ -129,6 +137,7 @@ nervous_system::walking(scheduler *sched)
 
         case 3:
             {
+                pause_for_key();
                 pump_right();
                 right_arm->cycle_backward(sched, this);
                 left_arm->cycle_forward(sched, this);
@@ -142,8 +151,12 @@ nervous_system::walking(scheduler *sched)
 
         case 4:
             {
-                //pump_left();
+                pause_for_key();
+#if PUMP_BOTH
                 pump_both();
+#else
+                pump_left();
+#endif
                 state = 5;
                 sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
             }
@@ -151,6 +164,7 @@ nervous_system::walking(scheduler *sched)
 
         case 5:
             {
+                pause_for_key();
                 pump_left();
                 right_arm->cycle_forward(sched, this);
                 left_arm->cycle_backward(sched, this);

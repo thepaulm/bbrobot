@@ -242,6 +242,15 @@ stdin_handler::run_callibration()
 }
 
 void
+pause_for_key()
+{
+    int c = 0;
+    cout << "Paused ...." << endl;
+    if (read(fileno(stdin), &c, 1));
+    cout << "Unpause." << endl;
+}
+
+void
 stdin_handler::fire(scheduler *psched)
 {
     int c = 0;
@@ -278,7 +287,9 @@ stdin_handler::fire(scheduler *psched)
                 /* Put us in a state right before a walk start */
                 cout << "Hang test." << endl;
                 spine->right_arm->request_forward();
+                spine->right_arm->request_up();
                 spine->left_leg->request_forward();
+                spine->left_leg->request_up();
 
                 spine->left_arm->request_backward();
                 spine->right_leg->request_backward();
@@ -298,9 +309,7 @@ stdin_handler::fire(scheduler *psched)
                 break;
 
             case 'p':
-                cout << "Paused ...." << endl;
-                if (read(fileno(stdin), &c, 1));
-                cout << "Unpause." << endl;
+                pause_for_key();
                 break;
 
             case 'c':

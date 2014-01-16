@@ -24,4 +24,6 @@ private:
 
 extern stdin_handler key_handler;
 
+void pause_for_key();
+
 #endif /* _STDIN_HANDLER_H */
