@@ -28,7 +28,7 @@ public:
     void connect();
     void disconnect();
 
-    void fire(scheduler *);
+    void schedule_fire(scheduler *);
 
     void sweep(scheduler *);
 

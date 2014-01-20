@@ -8,6 +8,7 @@
 #include <queue>
 
 class schedule_item;
+class scheduler;
 
 typedef unsigned schedule_ticket;
 
@@ -33,6 +34,33 @@ public:
                     const queued_schedule_item& rhs) const;
 };
 
+class schedule_item
+{
+public:
+    virtual void schedule_fire(scheduler *) = 0;
+};
+
+class io_item
+{
+public:
+    virtual void io_fire(scheduler *) = 0;
+};
+
+
+class reloop_pipe : public io_item
+{
+public:
+    reloop_pipe();
+    ~reloop_pipe();
+    void reloop();
+    void schedule(scheduler *);
+    void io_fire(scheduler *);
+
+private:
+    int pipe_read;
+    int pipe_write;
+};
+
 class scheduler
 {
 public:
@@ -47,24 +75,23 @@ public:
     schedule_ticket add_schedule_item_ms(unsigned us, schedule_item *item);
 
     /* These are for io based events */
-    void io_item(int fd, schedule_item *item);
+    void add_io_item(int fd, io_item *item);
+    io_item *remove_io_item(int fd);          // returns NULL if not found
+
+    /* Signal the loop to start again (to grab new descriptor list) */
+    void reloop();
 
     struct timeval now;
 private:
     void update_now();
     int highest_ios;
-    std::map<int, schedule_item *> ios_handlers;
+    std::map<int, io_item *> ios_handlers;
     std::priority_queue<queued_schedule_item,
                         std::vector<queued_schedule_item>,
                         queued_schedule_item_comparitor>timed_handlers;
     unsigned max_ticket; //XXXPAM: Some day this will wrap around
-};
-
-class schedule_item
-{
-public:
-    virtual ~schedule_item() {};
-    virtual void fire(scheduler *) = 0;
+    reloop_pipe rlp;
+    bool inselect;
 };
 
 extern scheduler *sched;

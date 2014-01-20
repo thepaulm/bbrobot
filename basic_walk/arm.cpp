@@ -87,7 +87,7 @@ arm::sweep(scheduler *sched)
 /* Arm Specific Positions */
 
 void
-arm::fire(scheduler *sched)
+arm::schedule_fire(scheduler *sched)
 {
     bool finish = false;
     int delay;
@@ -171,7 +171,7 @@ arm::cycle_forward(scheduler *sched, arm_completion_handler *c)
         return false;
     comp = c;
     state = 10;
-    fire(sched);
+    schedule_fire(sched);
 }
 
 bool
@@ -181,7 +181,7 @@ arm::cycle_backward(scheduler *sched, arm_completion_handler *c)
         return false;
     comp = c;
     state = 20;
-    fire(sched);
+    schedule_fire(sched);
 }
 
 int

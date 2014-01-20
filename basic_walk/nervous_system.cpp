@@ -3,6 +3,8 @@
 
 #define PUMP_SWITCH_DELAY_MS 1000
 
+using namespace std;
+
 nervous_system *spine;
 
 nervous_system::nervous_system(arm *lf, gpio *lfvalve,
@@ -25,10 +27,12 @@ nervous_system::nervous_system(arm *lf, gpio *lfvalve,
 , pump(pump)
 , state(0)
 {
+    thr_con = new threaded_control_mgr();
 }
 
 nervous_system::~nervous_system()
 {
+    delete thr_con;
 }
 
 void
@@ -104,6 +108,67 @@ nervous_system::pump_both()
 }
 
 #define PUMP_BOTH 1
+void
+nervous_system::control(threaded_control_mgr *tcm)
+{
+    cout << "nervous_system::control starting ..." << endl;
+    arm *arms[] = {right_arm, left_arm, right_leg, left_leg};
+
+    /* wait until no movement */
+    tcm->wait_arms(arms, 4);
+
+    /* pump on for this whole thing */
+    pump->on();
+
+    /* wait for key to start */
+    if ('q' == tcm->wait_keypress()) goto done;
+
+    /* initial forward position */
+    right_arm->cycle_forward(sched, tcm);
+    left_leg->cycle_forward(sched, tcm);
+
+    while (true) {
+        tcm->wait_arms(arms, 4);
+
+        /* right_arm forward, switch to right arm */
+        if ('q' == tcm->wait_keypress()) goto done;
+        pump_both();
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS); 
+
+        /* switched. Now we only need pump on the right */
+        if ('q' == tcm->wait_keypress()) goto done;
+        pump_right();
+
+        /* walk with the right arm */
+        if ('q' == tcm->wait_keypress()) goto done;
+        right_arm->cycle_backward(sched, tcm);
+        left_arm->cycle_forward(sched, tcm);
+
+        right_leg->cycle_forward(sched, tcm);
+        left_leg->cycle_backward(sched, tcm);
+        tcm->wait_arms(arms, 4);
+
+        /* left_arm forward. switch to left arm */
+        if ('q' == tcm->wait_keypress()) goto done;
+        pump_both();
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS);
+
+        /* switched. Now we only need pump on the left */
+        if ('q' == tcm->wait_keypress()) goto done;
+        pump_left();
+
+        /* Walk with the left arm */
+        right_arm->cycle_forward(sched, tcm);
+        left_arm->cycle_backward(sched, tcm);
+
+        right_leg->cycle_backward(sched, tcm);
+        left_leg->cycle_forward(sched, tcm);
+    }
+
+done:
+    cout << "nervous_system::control finished." << endl;
+    tcm->controller_done(this);
+}
 
 void
 nervous_system::walking(scheduler *sched)
@@ -184,7 +249,7 @@ nervous_system::walking(scheduler *sched)
 /* schedule_item callback */
 /* These calls are always just pump delay completions */
 void
-nervous_system::fire(scheduler *sched)
+nervous_system::schedule_fire(scheduler *sched)
 {
     walking(sched);
 }
@@ -201,8 +266,12 @@ nervous_system::finish(scheduler *sched, arm *done)
 void
 nervous_system::walk(scheduler *sched)
 {
+    /*
     state = 1;
     walking(sched);
+    */
+    thr_con->start_controller(this);
+    /* XXX: how to stop this? */
 }
 
 void

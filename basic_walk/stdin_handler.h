@@ -4,13 +4,13 @@
 #include <termios.h>
 #include "scheduler.h"
 
-class stdin_handler : public schedule_item
+class stdin_handler : public io_item
 {
 public:
     stdin_handler() :configed(false) {};
     ~stdin_handler() {};
 
-    void fire(scheduler *);
+    void io_fire(scheduler *);
     void config();
     void reset();
 private:
@@ -25,5 +25,7 @@ private:
 extern stdin_handler key_handler;
 
 void pause_for_key();
+void register_key_handler();
+void unregister_key_handler();
 
 #endif /* _STDIN_HANDLER_H */

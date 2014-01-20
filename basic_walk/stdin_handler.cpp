@@ -15,6 +15,18 @@ using namespace std;
 stdin_handler key_handler;
 
 void
+register_key_handler()
+{
+    sched->add_io_item(fileno(stdin), &key_handler);
+}
+
+void
+unregister_key_handler()
+{
+    sched->remove_io_item(fileno(stdin));
+}
+
+void
 stdin_handler::config()
 {
     struct termios ts;
@@ -251,7 +263,7 @@ pause_for_key()
 }
 
 void
-stdin_handler::fire(scheduler *psched)
+stdin_handler::io_fire(scheduler *psched)
 {
     int c = 0;
     if (read(fileno(stdin), &c, 1) > 0) {
@@ -270,6 +282,9 @@ stdin_handler::fire(scheduler *psched)
 
             case ARROW_UP:
                 cout << "walking ..." << endl;
+                /* hand the control entierly over to the thread driven
+                   walker */
+                unregister_key_handler();
                 spine->walk(sched);
                 break;
 

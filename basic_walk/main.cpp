@@ -98,7 +98,7 @@ main(int argc, char *argv[])
     key_handler.config();
     setup_exits();
 
-    sched->io_item(fileno(stdin), &key_handler);
+    register_key_handler();
 
     spine = new nervous_system(
                                /* Left front arm */

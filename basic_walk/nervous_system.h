@@ -2,8 +2,10 @@
 #define _NERVOUS_SYSTEM_H
 
 #include "arm.h"
+#include "threaded_control.h"
 
-class nervous_system : public arm_completion_handler, public schedule_item
+class nervous_system : public threaded_control, //XXX rest of these are going
+                       public arm_completion_handler, public schedule_item
 {
 public:
     nervous_system(arm *lf, gpio *lfvalve,
@@ -24,7 +26,9 @@ public:
     void pump_both();
 
     void finish(scheduler *, arm *);
-    void fire(scheduler *);
+    void schedule_fire(scheduler *);
+
+    void control(threaded_control_mgr *);
 
     arm *right_arm;
     arm *left_arm;
@@ -44,6 +48,7 @@ private:
     void walking(scheduler *);
 
     bool arms_busy();
+    threaded_control_mgr *thr_con;
 };
 
 extern nervous_system *spine;

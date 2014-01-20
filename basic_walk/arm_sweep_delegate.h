@@ -9,7 +9,7 @@ class arm_sweep_delegate : public schedule_item
     arm_sweep_delegate(arm *arm);
     void sweep(scheduler *);
 
-    void fire(scheduler *);
+    void schedule_fire(scheduler *);
 
     arm *parm;
     int state;

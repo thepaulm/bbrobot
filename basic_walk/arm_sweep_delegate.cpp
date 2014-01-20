@@ -10,7 +10,7 @@ arm_sweep_delegate::arm_sweep_delegate(arm *arm)
 }
 
 void
-arm_sweep_delegate::fire(scheduler *sched)
+arm_sweep_delegate::schedule_fire(scheduler *sched)
 {
     int delay;
     switch (state) {
@@ -70,5 +70,5 @@ void
 arm_sweep_delegate::sweep(scheduler *sched)
 {
     state = 1;
-    fire(sched);
+    schedule_fire(sched);
 }
