@@ -57,6 +57,7 @@ public:
     void save_down_state();
 
     struct config_arm *get_arm_config();
+    bool use();
 
 private:
     pwm *top;
@@ -70,6 +71,7 @@ private:
     unsigned backward_us;
 
     arm_completion_handler *comp;
+    bool in_use;
 
 friend class arm_sweep_delegate;
     arm_sweep_delegate *sweeper;

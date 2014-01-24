@@ -4,6 +4,11 @@
 
 using namespace std;
 
+
+#define STATIONARY 0
+#define MOVING_FORWARD 10
+#define MOVING_BACKWARD 20
+
 /* Arm */
 arm::arm(pwm *top, pwm *bottom,
          unsigned high_us, unsigned low_us,
@@ -15,8 +20,9 @@ arm::arm(pwm *top, pwm *bottom,
 , forward_us(forward_us)
 , backward_us(backward_us)
 , flags(flags)
-, state(0)
+, state(STATIONARY)
 , comp(NULL)
+, in_use(false)
 {
     /* this guy is here to handle the fire commands for the sweep action */
     sweeper = new arm_sweep_delegate(this);
@@ -84,44 +90,58 @@ arm::sweep(scheduler *sched)
     sweeper->sweep(sched);
 }
 
+bool
+arm::use()
+{
+    bool old = in_use;
+    in_use = true;
+    return old;
+}
+
 /* Arm Specific Positions */
 
 void
 arm::schedule_fire(scheduler *sched)
 {
     bool finish = false;
-    int delay;
+    int delay = 0;
 
     switch (state) {
         /* States for request forward:
 
            We bring the sholder up, bring the arm forward, bring the
            shoulder down */
-        case 10:
+        case MOVING_FORWARD:
             {
                 delay = request_up();
                 if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
+                else
+                    cout << "Ooops, arm not scheduling" << endl;
             }
             break;
 
-        case 11:
+        case MOVING_FORWARD + 1:
             {
                 delay = request_forward();
                 if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
+                else
+                    cout << "Ooops, arm not scheduling" << endl;
             }
             break;
 
-        case 12:
+        case MOVING_FORWARD + 2:
             {
                 delay = request_down();
                 if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
+                else
+                    cout << "Ooops, arm not scheduling" << endl;
             }
             break;
 
-        case 13:
+        case MOVING_FORWARD + 3:
             {
                 finish = true;
             }
@@ -131,25 +151,29 @@ arm::schedule_fire(scheduler *sched)
         /* States for request backward:
 
            We bring the arm backward */
-        case 20:
+        case MOVING_BACKWARD:
             {
                 delay = request_backward();
                 if (delay >= 0)
                     sched->add_schedule_item_ms(delay, this);
+                else
+                    cout << "Ooops, arm not scheduling" << endl;
             }
             break;
 
-        case 21:
+        case MOVING_BACKWARD + 1:
             {
                 finish = true;
             }
             break;
     }
 
+
     if (finish) {
         arm_completion_handler *old_comp = comp;
         comp = NULL;
-        state = 0;
+        state = STATIONARY;
+        in_use = false;
         old_comp->finish(sched, this);
     } else {
         state ++;
@@ -159,7 +183,7 @@ arm::schedule_fire(scheduler *sched)
 bool
 arm::busy()
 {
-    return state != 0;
+    return in_use;
 }
 
 /* XXXPAM: for all of these, make sure we don't have something
@@ -167,20 +191,26 @@ arm::busy()
 bool
 arm::cycle_forward(scheduler *sched, arm_completion_handler *c)
 {
-    if (comp)
+    if (comp) {
+        cerr << "DOUBLE COMPLETION REQUEST FOR ARM" << endl;
         return false;
+    }
+    use();
     comp = c;
-    state = 10;
+    state = MOVING_FORWARD;
     schedule_fire(sched);
 }
 
 bool
 arm::cycle_backward(scheduler *sched, arm_completion_handler *c)
 {
-    if (comp)
+    if (comp) {
+        cerr << "DOUBLE COMPLETION REQUEST FOR ARM" << endl;
         return false;
+    }
+    use();
     comp = c;
-    state = 20;
+    state = MOVING_BACKWARD;
     schedule_fire(sched);
 }
 

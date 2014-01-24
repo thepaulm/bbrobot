@@ -57,11 +57,13 @@ scheduler::scheduler()
 , max_ticket(0)
 , inselect(false)
 {
+    pthread_mutex_init(&elements_mutex, NULL);
     rlp.schedule(this);
 }
 
 scheduler::~scheduler()
 {
+    pthread_mutex_destroy(&elements_mutex);
 }
 
 void
@@ -81,7 +83,9 @@ scheduler::add_schedule_item(struct timeval *tv, schedule_item *item)
 {
     schedule_ticket t = max_ticket++;
     queued_schedule_item qsi(*tv, t, item);
+    pthread_mutex_lock(&elements_mutex);
     timed_handlers.push(qsi);
+    pthread_mutex_unlock(&elements_mutex);
     if (inselect)
         reloop();
     return t;
@@ -108,6 +112,8 @@ scheduler::loop()
 {
     int c;
     fd_set set;
+
+    pthread_mutex_lock(&elements_mutex);
     while (1) {
 
         update_now();
@@ -132,19 +138,28 @@ scheduler::loop()
             FD_SET(it->first, &set);
         }
 
+        pthread_mutex_unlock(&elements_mutex);
         int got = select(highest_ios + 1, &set, NULL, NULL, ptv);
+        pthread_mutex_lock(&elements_mutex);
 
         /* We have exited the select. Anybody needing the modify the select
            list elements may do so */
         inselect = false;
+
         if (got > 0) {
             /* XXX Need to check this for recursion - can we screw this
                iteration up by modifying it? I bet we can */
-            for (auto it = ios_handlers.begin();it != ios_handlers.end();++it) {
+            ios_handlers_running = ios_handlers;
+            for (auto it = ios_handlers_running.begin();
+                      it != ios_handlers_running.end();
+                      ++it) {
                 if (FD_ISSET(it->first, &set)) {
+                    pthread_mutex_unlock(&elements_mutex);
                     it->second->io_fire(this);
+                    pthread_mutex_lock(&elements_mutex);
                 }
             }
+            ios_handlers_running.clear();
         }
 
         update_now();
@@ -152,24 +167,29 @@ scheduler::loop()
             tv = timed_handlers.top().tv;
             if (tv_compare(tv, now) <= 0) {
                 schedule_item *item = timed_handlers.top().item;
-                item->schedule_fire(sched);
                 timed_handlers.pop();
+                pthread_mutex_unlock(&elements_mutex);
+                item->schedule_fire(sched);
+                pthread_mutex_lock(&elements_mutex);
             } else {
                 break;
             }
         }
-        
     }
+    pthread_mutex_unlock(&elements_mutex);
 }
 
 void
 scheduler::add_io_item(int fd, io_item *item)
 {
+    pthread_mutex_lock(&elements_mutex);
     if (fd > highest_ios) {
         highest_ios = fd;
     }
     /* XXXPAM: Check for duplicate before adding */
     ios_handlers.insert(std::pair<int, io_item *>(fd, item)); 
+
+    pthread_mutex_unlock(&elements_mutex);
 
     if (inselect)
         reloop();
@@ -179,9 +199,11 @@ io_item *
 scheduler::remove_io_item(int fd)
 {
     io_item *ret = NULL;
+    pthread_mutex_lock(&elements_mutex);
     if (ios_handlers.count(fd) > 0) {
         ret = ios_handlers.at(fd);
         ios_handlers.erase(fd);
     }
+    pthread_mutex_unlock(&elements_mutex);
     return ret;
 }

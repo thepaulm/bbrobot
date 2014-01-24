@@ -224,9 +224,13 @@ native_pwm::set_duty_ns(unsigned d)
     cout << "(native) new duty: " << d << endl;
     if (write_file_value("duty", d)) {
         duty_ns = d;
+        if (delay < 0) {
+            cout << "native_pwm::set_duty_ns returning " << delay << endl;
+        }
         return delay;
     } else {
         duty_ns = d;
+        cout << "native_pwm::set_duty_ns returning -1" << endl;
         return -1;
     }
 }
@@ -288,7 +292,8 @@ pmssc_pwm::set_duty_ns(unsigned ns)
         return delay;
     } else {
         duty_ns = ns;
-        return -1;
+        cout << "pmssc_pwm::set_duty_ns returning -1" << endl;
+        return 0;
     }
 }
 

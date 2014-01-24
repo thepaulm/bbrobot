@@ -114,6 +114,9 @@ nervous_system::control(threaded_control_mgr *tcm)
     cout << "nervous_system::control starting ..." << endl;
     arm *arms[] = {right_arm, left_arm, right_leg, left_leg};
 
+    /* XXX THe problem here is that we may not be on the completion
+       list for these arms. We'll have to address this */
+
     /* wait until no movement */
     tcm->wait_arms(arms, 4);
 
@@ -121,48 +124,71 @@ nervous_system::control(threaded_control_mgr *tcm)
     pump->on();
 
     /* wait for key to start */
+    cout << "------ PRE LOOP -----------------------------" << endl;
     if ('q' == tcm->wait_keypress()) goto done;
 
     /* initial forward position */
-    right_arm->cycle_forward(sched, tcm);
-    left_leg->cycle_forward(sched, tcm);
+    tcm->arm_cycle_forward(sched, right_arm);
+    tcm->arm_cycle_forward(sched, left_leg);
 
     while (true) {
+        cout << "Waiting arms ..." << endl;
         tcm->wait_arms(arms, 4);
+        cout << "1) All 4 arms DONE" << endl << endl;
 
         /* right_arm forward, switch to right arm */
+        cout << "---------------------------------------------" << endl;
+        cout.flush();
         if ('q' == tcm->wait_keypress()) goto done;
+        cout << "pump both" << endl;
         pump_both();
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS); 
 
         /* switched. Now we only need pump on the right */
+        cout << "---------------------------------------------" << endl;
+        cout.flush();
         if ('q' == tcm->wait_keypress()) goto done;
+        cout << "pump right" << endl;
         pump_right();
 
         /* walk with the right arm */
+        cout << "---------------------------------------------" << endl;
+        cout.flush();
         if ('q' == tcm->wait_keypress()) goto done;
-        right_arm->cycle_backward(sched, tcm);
-        left_arm->cycle_forward(sched, tcm);
+        cout << "left walk" << endl;;
+        tcm->arm_cycle_backward(sched, right_arm);
+        tcm->arm_cycle_forward(sched, left_arm);
 
-        right_leg->cycle_forward(sched, tcm);
-        left_leg->cycle_backward(sched, tcm);
+        tcm->arm_cycle_forward(sched, right_leg);
+        tcm->arm_cycle_backward(sched, left_leg);
         tcm->wait_arms(arms, 4);
+        cout << "2) All 4 arms DONE" << endl;
 
         /* left_arm forward. switch to left arm */
+        cout << "---------------------------------------------" << endl;
+        cout.flush();
         if ('q' == tcm->wait_keypress()) goto done;
+        cout << "pump both" << endl;
         pump_both();
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS);
 
         /* switched. Now we only need pump on the left */
+        cout << "---------------------------------------------" << endl;
+        cout.flush();
         if ('q' == tcm->wait_keypress()) goto done;
+        cout << "pump left" << endl;
         pump_left();
 
         /* Walk with the left arm */
-        right_arm->cycle_forward(sched, tcm);
-        left_arm->cycle_backward(sched, tcm);
+        cout << "---------------------------------------------" << endl;
+        cout.flush();
+        if ('q' == tcm->wait_keypress()) goto done;
+        cout << "right walk" << endl;
+        tcm->arm_cycle_forward(sched, right_arm);
+        tcm->arm_cycle_backward(sched, left_arm);
 
-        right_leg->cycle_backward(sched, tcm);
-        left_leg->cycle_forward(sched, tcm);
+        tcm->arm_cycle_backward(sched, right_leg);
+        tcm->arm_cycle_forward(sched, left_leg);
     }
 
 done:

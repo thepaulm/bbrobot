@@ -1,6 +1,7 @@
 #ifndef _SCHEDULER_H
 #define _SCHEDULER_H
 
+#include <pthread.h>
 #include <sys/time.h>
 
 #include <vector>
@@ -86,12 +87,14 @@ private:
     void update_now();
     int highest_ios;
     std::map<int, io_item *> ios_handlers;
+    std::map<int, io_item *> ios_handlers_running;
     std::priority_queue<queued_schedule_item,
                         std::vector<queued_schedule_item>,
                         queued_schedule_item_comparitor>timed_handlers;
     unsigned max_ticket; //XXXPAM: Some day this will wrap around
     reloop_pipe rlp;
     bool inselect;
+    pthread_mutex_t elements_mutex;
 };
 
 extern scheduler *sched;

@@ -1,3 +1,5 @@
+#include <functional>
+
 #include <pthread.h>
 #include "threaded_control.h"
 #include "scheduler.h"
@@ -7,11 +9,22 @@ using namespace std;
 
 threaded_control_mgr::threaded_control_mgr()
 {
-    cout << "INITIALIZING the threaded_control_mgr" << endl;
     if (0 != pthread_cond_init(&condvar, NULL)) {
         cerr << "pthread_cond_init failed." << endl;
     }
     if (0 != pthread_mutex_init(&condvarmut, NULL)) {
+        cerr << "pthread_mutex_init failed." << endl;
+    }
+    if (0 != pthread_cond_init(&iovar, NULL)) {
+        cerr << "pthread_cond_init failed." << endl;
+    }
+    if (0 != pthread_mutex_init(&iovarmut, NULL)) {
+        cerr << "pthread_mutex_init failed." << endl;
+    }
+    if (0 != pthread_cond_init(&armsvar, NULL)) {
+        cerr << "pthread_cond_init failed." << endl;
+    }
+    if (0 != pthread_mutex_init(&armsmut, NULL)) {
         cerr << "pthread_mutex_init failed." << endl;
     }
 }
@@ -20,6 +33,10 @@ threaded_control_mgr::~threaded_control_mgr()
 {
     pthread_cond_destroy(&condvar);
     pthread_mutex_destroy(&condvarmut);
+    pthread_cond_destroy(&iovar);
+    pthread_mutex_destroy(&iovarmut);
+    pthread_cond_destroy(&armsvar);
+    pthread_mutex_destroy(&armsmut);
 }
 
 /* --------------------------------
@@ -28,6 +45,15 @@ threaded_control_mgr::~threaded_control_mgr()
 void
 threaded_control_mgr::finish(scheduler *sched, arm *arm)
 {
+    bool release = false;
+    pthread_mutex_lock(&armsmut);
+    waiting_arms.erase(arm);
+    if (waiting_arms.empty()) {
+        release = true;
+    }
+    pthread_mutex_unlock(&armsmut);
+    if (release)
+        pthread_cond_broadcast(&armsvar);
 }
 
 void
@@ -41,12 +67,48 @@ threaded_control_mgr::io_fire(scheduler *sched)
 {
     read(fileno(stdin), &char_to_deliver, 1);
     sched->remove_io_item(fileno(stdin));
-    pthread_cond_broadcast(&condvar);
+    pthread_cond_broadcast(&iovar);
 }
 
 /* --------------------------------
    Threaded Services
    --------------------------------*/
+
+class scheduled_lambda : public schedule_item
+{
+public:
+    scheduled_lambda(std::function<void(void)>l) : lambda(l){}
+    void schedule_fire(scheduler *) {lambda();delete this;}
+
+private:
+    std::function<void(void)>lambda;
+};
+
+void
+threaded_control_mgr::arm_cycle_forward(scheduler *sched, arm *a)
+{
+    arm_completion_handler *c = this;
+    /* Mark this arm as in use. It is our intent to use it */
+    a->use();
+    sched->add_schedule_item_us(0,
+            new scheduled_lambda(function<void(void)>([a, sched, c](void)
+            {
+                a->cycle_forward(sched, c);
+            })));
+}
+
+void
+threaded_control_mgr::arm_cycle_backward(scheduler *sched, arm *a)
+{
+    arm_completion_handler *c = this;
+    /* Mark this arm as in use. It is our intent to use it */
+    a->use();
+    sched->add_schedule_item_us(0,
+            new scheduled_lambda(function<void(void)>([a, sched, c](void)
+            {
+                a->cycle_backward(sched, c);
+            })));
+}
 
 void
 threaded_control_mgr::wait_condvar()
@@ -56,12 +118,29 @@ threaded_control_mgr::wait_condvar()
     pthread_mutex_unlock(&condvarmut);
 }
 
-    /* XXX This isn't threadsafe! Move to a request queue model to 
-       go from this control thread to the driver thread */
+void
+threaded_control_mgr::wait_iovar()
+{
+    pthread_mutex_lock(&iovarmut);
+    pthread_cond_wait(&iovar, &iovarmut);
+    pthread_mutex_unlock(&iovarmut);
+}
 
 void
 threaded_control_mgr::wait_arms(arm *arms[], int count)
 {
+    pthread_mutex_lock(&armsmut);
+    for (int i = 0; i < count; i++) {
+        if (arms[i]->busy()) {
+            waiting_arms.insert(arms[i]);
+        }
+    }
+
+    if (!waiting_arms.empty()) {
+        /* Pay close attention to the order of these operations */
+        pthread_cond_wait(&armsvar, &armsmut);
+    }
+    pthread_mutex_unlock(&armsmut);
 }
 
 void
@@ -77,7 +156,7 @@ threaded_control_mgr::wait_keypress()
 {
     sched->add_io_item(fileno(stdin), this);
 
-    wait_condvar();
+    wait_iovar();
 
     return char_to_deliver;
 }
@@ -108,7 +187,6 @@ threaded_control_mgr::start_controller(threaded_control *c)
 void
 threaded_control_mgr::controller_done(threaded_control *c)
 {
-    cout << "threaded_control_mgr::controller_done" << endl;
     register_key_handler();
     sched->reloop();
 }
