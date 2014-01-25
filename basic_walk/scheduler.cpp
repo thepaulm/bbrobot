@@ -11,7 +11,9 @@ using namespace std;
 reloop_pipe::reloop_pipe()
 {
     int fds[2];
-    pipe(fds);
+    if (pipe(fds) < 0) {
+        cerr << "PIPE CALL FAILED" << endl;
+    }
     pipe_read = fds[0];
     pipe_write = fds[1];
 }
@@ -26,7 +28,9 @@ void
 reloop_pipe::reloop()
 {
     int c = 0;
-    write(pipe_write, &c, 1);
+    if (write(pipe_write, &c, 1) <= 0) {
+        cerr << "reloop write failed?" << endl;
+    }
 }
 
 void
@@ -39,7 +43,7 @@ void
 reloop_pipe::io_fire(scheduler *sched)
 {
     int c;
-    read(pipe_read, &c, 1);
+    if (read(pipe_read, &c, 1) > 0);
 }
 
 bool
@@ -147,8 +151,6 @@ scheduler::loop()
         inselect = false;
 
         if (got > 0) {
-            /* XXX Need to check this for recursion - can we screw this
-               iteration up by modifying it? I bet we can */
             ios_handlers_running = ios_handlers;
             for (auto it = ios_handlers_running.begin();
                       it != ios_handlers_running.end();

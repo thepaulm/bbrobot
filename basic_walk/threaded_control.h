@@ -46,11 +46,13 @@ private:
 
     pthread_cond_t condvar;
     pthread_mutex_t condvarmut;    
+    bool condvar_triggered;
 
     pthread_cond_t iovar;
     pthread_mutex_t iovarmut;
+    bool iovar_triggered;
 
-    pthread_cond_t armsvar;;
+    pthread_cond_t armsvar;
     pthread_mutex_t armsmut;
 
     int char_to_deliver;

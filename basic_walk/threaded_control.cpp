@@ -8,6 +8,8 @@
 using namespace std;
 
 threaded_control_mgr::threaded_control_mgr()
+: condvar_triggered(false)
+, iovar_triggered(false)
 {
     if (0 != pthread_cond_init(&condvar, NULL)) {
         cerr << "pthread_cond_init failed." << endl;
@@ -59,14 +61,21 @@ threaded_control_mgr::finish(scheduler *sched, arm *arm)
 void
 threaded_control_mgr::schedule_fire(scheduler *sched)
 {
+    pthread_mutex_lock(&condvarmut);
+    condvar_triggered = true;
+    pthread_mutex_unlock(&condvarmut);
     pthread_cond_broadcast(&condvar);
 }
 
 void
 threaded_control_mgr::io_fire(scheduler *sched)
 {
-    read(fileno(stdin), &char_to_deliver, 1);
+    if (read(fileno(stdin), &char_to_deliver, 1) < 0);
     sched->remove_io_item(fileno(stdin));
+
+    pthread_mutex_lock(&iovarmut);
+    iovar_triggered = true;
+    pthread_mutex_unlock(&iovarmut);
     pthread_cond_broadcast(&iovar);
 }
 
@@ -114,7 +123,11 @@ void
 threaded_control_mgr::wait_condvar()
 {
     pthread_mutex_lock(&condvarmut);
-    pthread_cond_wait(&condvar, &condvarmut);
+    if (condvar_triggered) {
+        condvar_triggered = false;
+    } else {
+        pthread_cond_wait(&condvar, &condvarmut);
+    }
     pthread_mutex_unlock(&condvarmut);
 }
 
@@ -122,7 +135,11 @@ void
 threaded_control_mgr::wait_iovar()
 {
     pthread_mutex_lock(&iovarmut);
-    pthread_cond_wait(&iovar, &iovarmut);
+    if (iovar_triggered) {
+        iovar_triggered = false;
+    } else {
+        pthread_cond_wait(&iovar, &iovarmut);
+    }
     pthread_mutex_unlock(&iovarmut);
 }
 
@@ -146,6 +163,7 @@ threaded_control_mgr::wait_arms(arm *arms[], int count)
 void
 threaded_control_mgr::wait_schedule_item(unsigned us)
 {
+    condvar_triggered = false;
     sched->add_schedule_item_us(us, this);
 
     wait_condvar();
@@ -154,6 +172,7 @@ threaded_control_mgr::wait_schedule_item(unsigned us)
 int
 threaded_control_mgr::wait_keypress()
 {
+    iovar_triggered = false;
     sched->add_io_item(fileno(stdin), this);
 
     wait_iovar();
