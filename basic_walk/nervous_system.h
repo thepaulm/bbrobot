@@ -4,8 +4,7 @@
 #include "arm.h"
 #include "threaded_control.h"
 
-class nervous_system : public threaded_control, //XXX rest of these are going
-                       public arm_completion_handler, public schedule_item
+class nervous_system : public threaded_control
 {
 public:
     nervous_system(arm *lf, gpio *lfvalve,
@@ -19,14 +18,10 @@ public:
     void disconnect();
 
     void walk(scheduler *);
-    void stop(scheduler *);
 
     void pump_left();
     void pump_right();
     void pump_both();
-
-    void finish(scheduler *, arm *);
-    void schedule_fire(scheduler *);
 
     void control(threaded_control_mgr *);
 
@@ -42,12 +37,7 @@ public:
     gpio *lbvalve;
     gpio *rbvalve;
 
-    int state;
-
 private:
-    void walking(scheduler *);
-
-    bool arms_busy();
     threaded_control_mgr *thr_con;
 };
 

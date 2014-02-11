@@ -288,11 +288,6 @@ stdin_handler::io_fire(scheduler *psched)
                 spine->walk(sched);
                 break;
 
-            case ARROW_DOWN:
-                cout << "Stop." << endl;
-                spine->stop(sched);
-                break;
-
             case 's':
                 cout << "Stand." << endl;
                 each_arm(request_standing);

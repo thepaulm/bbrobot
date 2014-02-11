@@ -25,7 +25,6 @@ nervous_system::nervous_system(arm *lf, gpio *lfvalve,
 , rbvalve(rbvalve)
 
 , pump(pump)
-, state(0)
 {
     thr_con = new threaded_control_mgr();
 }
@@ -56,13 +55,6 @@ nervous_system::disconnect()
     if (rfvalve) rfvalve->off();
     if (lbvalve) lbvalve->off();
     if (rbvalve) rbvalve->off();
-}
-
-bool
-nervous_system::arms_busy()
-{
-    return (left_arm->busy() || right_arm->busy() ||
-            left_leg->busy() || right_leg->busy());
 }
 
 /* Valves fire across the body. Normally they are either rf+lb, or lf+rb. This
@@ -121,7 +113,7 @@ nervous_system::control(threaded_control_mgr *tcm)
     tcm->wait_arms(arms, 4);
 
     /* pump on for this whole thing */
-    pump->on();
+    //pump->on();
 
     /* wait for key to start */
     cout << "------ PRE LOOP -----------------------------" << endl;
@@ -192,136 +184,14 @@ nervous_system::control(threaded_control_mgr *tcm)
     }
 
 done:
+    pump->off();
     cout << "nervous_system::control finished." << endl;
     tcm->controller_done(this);
 }
 
 void
-nervous_system::walking(scheduler *sched)
-{
-    if (arms_busy())
-        return;
-
-    switch (state) {
-        case 1:
-            {
-                pause_for_key();
-                pump->on();
-                right_arm->cycle_forward(sched, this);
-                left_leg->cycle_forward(sched, this);
-                state = 2;
-            }
-            break;
-
-        case 2:
-            {
-                pause_for_key();
-#if PUMP_BOTH
-                pump_both();
-#else
-                pump_right();
-#endif
-                state = 3;
-                sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
-            }
-            break;
-
-        case 3:
-            {
-                pause_for_key();
-                pump_right();
-                right_arm->cycle_backward(sched, this);
-                left_arm->cycle_forward(sched, this);
-
-                right_leg->cycle_forward(sched, this);
-                left_leg->cycle_backward(sched, this);
-
-                state = 4;
-            }
-            break;
-
-        case 4:
-            {
-                pause_for_key();
-#if PUMP_BOTH
-                pump_both();
-#else
-                pump_left();
-#endif
-                state = 5;
-                sched->add_schedule_item_ms(PUMP_SWITCH_DELAY_MS, this);
-            }
-            break;
-
-        case 5:
-            {
-                pause_for_key();
-                pump_left();
-                right_arm->cycle_forward(sched, this);
-                left_arm->cycle_backward(sched, this);
-
-                right_leg->cycle_backward(sched, this);
-                left_leg->cycle_forward(sched, this);
-                state = 2;
-            }
-            break;
-
-        case 86:
-            stop(sched);
-            break;
-    }
-}
-
-/* schedule_item callback */
-/* These calls are always just pump delay completions */
-void
-nervous_system::schedule_fire(scheduler *sched)
-{
-    walking(sched);
-}
-
-/* arm_completion_handler callback */
-void
-nervous_system::finish(scheduler *sched, arm *done)
-{
-    /* there are no outstanding arms doing movement, move to the next
-       position */
-    walking(sched);
-}
-
-void
 nervous_system::walk(scheduler *sched)
 {
-    /*
-    state = 1;
-    walking(sched);
-    */
     thr_con->start_controller(this);
-    /* XXX: how to stop this? */
 }
 
-void
-nervous_system::stop(scheduler *sched)
-{
-    if (arms_busy()) {
-        state = 86;
-    } else {
-        right_arm->request_backward();
-        left_arm->request_backward();
-        right_leg->request_backward();
-        left_leg->request_backward();
-
-        right_arm->request_down();
-        left_arm->request_down();
-        right_leg->request_down();
-        left_leg->request_down();
-
-        pump->off();
-        usleep(200 * 1000);
-        lfvalve->off();
-        rfvalve->off();
-        lbvalve->off();
-        rbvalve->off();
-        state = 0;
-    }
-}
