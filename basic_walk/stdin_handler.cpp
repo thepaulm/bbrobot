@@ -288,6 +288,12 @@ stdin_handler::io_fire(scheduler *psched)
                 spine->walk(sched);
                 break;
 
+            case ARROW_DOWN:
+                cout << "halt walking ..." << endl;
+                unregister_key_handler();
+                spine->halt_walk(sched);
+                break;
+
             case 's':
                 cout << "Stand." << endl;
                 each_arm(request_standing);
@@ -296,13 +302,15 @@ stdin_handler::io_fire(scheduler *psched)
             case 'h':
                 /* Put us in a state right before a walk start */
                 cout << "Hang test." << endl;
-                spine->right_arm->request_forward();
+                spine->right_arm->request_backward();
                 spine->right_arm->request_up();
-                spine->left_leg->request_forward();
+                spine->left_leg->request_backward();
                 spine->left_leg->request_up();
 
-                spine->left_arm->request_backward();
-                spine->right_leg->request_backward();
+                spine->left_arm->request_forward();
+                spine->left_arm->request_down();
+                spine->right_leg->request_forward();
+                spine->right_leg->request_down();
 
                 spine->pump_left();
                 spine->pump->on();

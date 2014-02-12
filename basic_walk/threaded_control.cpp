@@ -70,7 +70,10 @@ threaded_control_mgr::schedule_fire(scheduler *sched)
 void
 threaded_control_mgr::io_fire(scheduler *sched)
 {
+    cout << "thread control mgr io_fire" << endl;
+    char_to_deliver = 0;
     if (read(fileno(stdin), &char_to_deliver, 1) < 0);
+    cout << "got char " << (int)char_to_deliver << endl;
     sched->remove_io_item(fileno(stdin));
 
     pthread_mutex_lock(&iovarmut);

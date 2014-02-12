@@ -17,6 +17,7 @@ public:
     void connect();
     void disconnect();
 
+    void halt_walk(scheduler *);
     void walk(scheduler *);
 
     void pump_left();
@@ -39,6 +40,7 @@ public:
 
 private:
     threaded_control_mgr *thr_con;
+    bool halting;
 };
 
 extern nervous_system *spine;
