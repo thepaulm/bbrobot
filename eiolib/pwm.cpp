@@ -25,7 +25,7 @@
 #define DEFAULT_MIN_NS (1 * 1000 * 1000)
 #define DEFAULT_MAX_NS (2 * 1000 * 1000)
 
-#define DELAY_PER_PWM_US__US (0.8)
+#define DELAY_PER_PWM_US__US (1.8)
 
 using namespace std;
 

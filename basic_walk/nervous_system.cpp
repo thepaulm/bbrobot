@@ -1,7 +1,7 @@
 #include "nervous_system.h"
 #include "stdin_handler.h"
 
-#define PUMP_SWITCH_DELAY_MS 1000
+#define PUMP_SWITCH_DELAY_US (1000 * 1000)
 
 using namespace std;
 
@@ -138,8 +138,9 @@ nervous_system::control(threaded_control_mgr *tcm)
         cout << "---------------------------------------------" << endl;
         if (halting && 'q' == tcm->wait_keypress()) goto done;
         cout << "pump both" << endl;
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_both();
-        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS); 
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
 
         /* pull up with all 4 arms */
         cout << "---------------------------------------------" << endl;
@@ -156,8 +157,9 @@ nervous_system::control(threaded_control_mgr *tcm)
         if (halting && 'q' == tcm->wait_keypress()) goto done;
 
         cout << "right side pump" << endl;
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_right();
-        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS); 
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         cout << "---------------------------------------------" << endl;
         if (halting && 'q' == tcm->wait_keypress()) goto done;
 
@@ -170,17 +172,18 @@ nervous_system::control(threaded_control_mgr *tcm)
         if (halting && 'q' == tcm->wait_keypress()) goto done;
 
         cout << "pump both" << endl;
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_both();
-        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS); 
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
 
         /* pull up with all 4 arms */
         cout << "---------------------------------------------" << endl;
         if (halting && 'q' == tcm->wait_keypress()) goto done;
 
         cout << "pump left" << endl;
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_left();
-
-        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_MS); 
+        tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
 
         /* pull up with all 4 arms */
         cout << "---------------------------------------------" << endl;
