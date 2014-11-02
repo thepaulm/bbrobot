@@ -12,13 +12,15 @@ using namespace std;
 /* Arm */
 arm::arm(pwm *top, pwm *bottom,
          unsigned high_us, unsigned low_us,
-         unsigned forward_us, unsigned backward_us, int flags)
+         unsigned forward_us, unsigned backward_us, unsigned attach_us,
+         int flags)
 : top(top)
 , bottom(bottom)
 , high_us(high_us)
 , low_us(low_us)
 , forward_us(forward_us)
 , backward_us(backward_us)
+, attach_us(attach_us)
 , flags(flags)
 , state(STATIONARY)
 , comp(NULL)
@@ -49,6 +51,14 @@ arm::save_backward_state()
     cout << "setting backward from " << backward_us;
     backward_us = bottom->get_duty_us();
     cout << " to " << backward_us << endl;
+}
+
+void
+arm::save_attach_state()
+{
+    cout << "setting attach from " << attach_us;
+    attach_us = bottom->get_duty_us();
+    cout << " to " << attach_us << endl;
 }
 
 void
@@ -142,6 +152,16 @@ arm::schedule_fire(scheduler *sched)
             break;
 
         case MOVING_FORWARD + 3:
+            {
+                delay = request_attach();
+                if (delay >= 0)
+                    sched->add_schedule_item_ms(delay, this);
+                else
+                    cout << "Ooops, arm not scheduling" << endl;
+            }
+            break;
+
+        case MOVING_FORWARD + 4:
             {
                 finish = true;
             }
@@ -245,6 +265,12 @@ arm::request_down()
     return top->set_duty_us(low_us);
 }
 
+int
+arm::request_attach()
+{
+    return bottom->set_duty_us(attach_us);
+}
+
 struct config_arm *
 arm::get_arm_config()
 {
@@ -255,6 +281,7 @@ arm::get_arm_config()
     cfg->low_us = low_us;
     cfg->forward_us = forward_us;
     cfg->backward_us = backward_us;
+    cfg->attach_us = attach_us;
     return cfg;
 }
 

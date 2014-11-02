@@ -184,11 +184,12 @@ stdin_handler::run_callibration()
 
     while (1) {
         while (1) {
-            cout << "Enter [f]orward, [b]backward, [u]p, or [d]own ..." << endl;
+            cout << 
+            "Enter [f]orward, [b]backward, [u]p, [d]own, [a]ttach ..." << endl;
             cout << "[SPACE]: quit, s: save" << endl;
             if (read(fileno(stdin), &c, 1));
             m = c;
-            if (m == 'f' || m == 'b' || m == 'u' || m == 'd')
+            if (m == 'f' || m == 'b' || m == 'u' || m == 'd' || m == 'a')
                 break;
             if (c == ' ') {
                 cout << "Callibration complete, not saving." << endl;
@@ -214,6 +215,9 @@ stdin_handler::run_callibration()
                 break;
             case 'd':
                 each_arm(request_down);
+                break;
+            case 'a':
+                each_arm(request_attach);
                 break;
         }
 
@@ -244,6 +248,9 @@ stdin_handler::run_callibration()
                         break;
                     case 'd':
                         each_arm(save_down_state);
+                        break;
+                    case 'a':
+                        each_arm(save_attach_state);
                         break;
                 }
                 break;

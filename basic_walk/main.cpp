@@ -80,6 +80,7 @@ load_arm_from_config(struct config_arm *cfga, int flags)
                   cfga->low_us,
                   cfga->forward_us,
                   cfga->backward_us,
+                  cfga->attach_us,
                   LEFT | FRONT);
 }
 

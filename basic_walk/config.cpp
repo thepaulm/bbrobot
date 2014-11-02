@@ -70,6 +70,11 @@ create_config_arm(struct config_arm *cfga, Json::Value arms, const char *name)
     create_config_servo(&cfga->bottom, servos["bottom"]);
     cfga->forward_us = servos["bottom"]["forward_us"].asInt();
     cfga->backward_us = servos["bottom"]["backward_us"].asInt();
+    if (servos["bottom"].isMember("attach_us")) {
+        cfga->attach_us = servos["bottom"]["attach_us"].asInt();
+    } else {
+        cfga->attach_us = cfga->forward_us;
+    }
 
     return true;;
 }
@@ -132,6 +137,7 @@ create_arm_config(struct config_arm *cfga, Json::Value& arms, const char *name)
     Json::Value b = Json::Value(Json::objectValue);
     b["forward_us"] = Json::Value(cfga->forward_us);
     b["backward_us"] = Json::Value(cfga->backward_us);
+    b["attach_us"] = Json::Value(cfga->attach_us);
     cfga->bottom->get_json_config(b);
 
     servos["top"] = t;

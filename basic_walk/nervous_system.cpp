@@ -101,6 +101,13 @@ nervous_system::pump_both()
     rbvalve->off();
 }
 
+#define WAIT_STAGE()                                                        \
+do {                                                                        \
+    tcm->wait_arms(arms, 4);                                                \
+    cout << "---------------------------------------------" << endl;        \
+    if (halting && 'q' == tcm->wait_keypress()) goto done;                  \
+} while (0)
+ 
 #define PUMP_BOTH 1
 void
 nervous_system::control(threaded_control_mgr *tcm)
@@ -111,15 +118,12 @@ nervous_system::control(threaded_control_mgr *tcm)
     /* XXX THe problem here is that we may not be on the completion
        list for these arms. We'll have to address this */
 
-    /* wait until no movement */
-    tcm->wait_arms(arms, 4);
-
     /* pump on for this whole thing */
     //pump->on();
 
     /* wait for key to start */
     cout << "------ PRE LOOP -----------------------------" << endl;
-    if (halting && 'q' == tcm->wait_keypress()) goto done;
+    WAIT_STAGE();
 
     /* If we did hang test first, we should have left arm / right leg
        forward and negative pressure, right arm / left leg up and backward
@@ -127,67 +131,53 @@ nervous_system::control(threaded_control_mgr *tcm)
 
     while (true) {
 
+        /* LEFT CYCLE ************************/
+        /* Pull up with left arm / right leg */
+        tcm->arm_cycle_backward(sched, left_arm);
+        tcm->arm_cycle_backward(sched, right_leg);
+
+        WAIT_STAGE();
+
+        /* Move right arm / left leg forward */
         tcm->arm_cycle_forward(sched, right_arm);
         tcm->arm_cycle_forward(sched, left_leg);
 
-        cout << "Waiting arms ..." << endl;
-        tcm->wait_arms(arms, 4);
-        cout << "1) All 4 arms DONE" << endl << endl;
+        WAIT_STAGE();
 
-        /* right_arm forward, all arms connected */
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
-        cout << "pump both" << endl;
+        /* Pump all */
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_both();
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
 
-        /* pull up with all 4 arms */
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
-        cout << "all pull" << endl;
-
-        tcm->arm_cycle_backward(sched, right_arm);
-        tcm->arm_cycle_backward(sched, left_arm);
-        tcm->arm_cycle_backward(sched, right_leg);
-        tcm->arm_cycle_backward(sched, left_leg);
-        tcm->wait_arms(arms, 4);
-
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
-
-        cout << "right side pump" << endl;
+        /* Pump right */
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_right();
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
 
-        cout << "left arm swing" << endl;
 
+        /* RIGHT CYCLE ************************/
+
+        /* Pull up with right arm /left leg */
+        tcm->arm_cycle_backward(sched, right_arm);
+        tcm->arm_cycle_backward(sched, left_leg);
+
+        WAIT_STAGE();
+
+        /* Move left_arm / right_leg forward */
         tcm->arm_cycle_forward(sched, left_arm);
         tcm->arm_cycle_forward(sched, right_leg);
-        tcm->wait_arms(arms, 4);
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
+        
+        WAIT_STAGE();
 
-        cout << "pump both" << endl;
+        /* Pump all */
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_both();
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
 
-        /* pull up with all 4 arms */
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
-
-        cout << "pump left" << endl;
+        /* Pump left */
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
         pump_left();
         tcm->wait_schedule_item(PUMP_SWITCH_DELAY_US); 
-
-        /* pull up with all 4 arms */
-        cout << "---------------------------------------------" << endl;
-        if (halting && 'q' == tcm->wait_keypress()) goto done;
     }
 
 done:

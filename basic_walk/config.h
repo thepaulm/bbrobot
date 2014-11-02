@@ -11,6 +11,7 @@ struct config_arm
     pwm *bottom;
     unsigned forward_us;
     unsigned backward_us;
+    unsigned attach_us;
 };
 
 struct config

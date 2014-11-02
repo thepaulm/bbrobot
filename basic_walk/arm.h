@@ -22,7 +22,8 @@ class arm : public schedule_item
 public:
     arm(pwm *top, pwm *bottom,
         unsigned high_us, unsigned low_us,
-        unsigned forward_us, unsigned backward_us, int flags);
+        unsigned forward_us, unsigned backward_us, unsigned attach_us,
+        int flags);
     ~arm();
 
     void connect();
@@ -41,6 +42,7 @@ public:
     int request_down();
     int request_forward();
     int request_backward();
+    int request_attach();
     int request_standing();
 
     /* Is this arm currently in motion */
@@ -53,6 +55,7 @@ public:
 
     void save_forward_state();
     void save_backward_state();
+    void save_attach_state();
     void save_up_state();
     void save_down_state();
 
@@ -69,6 +72,7 @@ private:
     unsigned low_us;
     unsigned forward_us;
     unsigned backward_us;
+    unsigned attach_us;
 
     arm_completion_handler *comp;
     bool in_use;
