@@ -15,8 +15,20 @@ using namespace std;
 stdin_handler key_handler;
 
 void
+explain_keys()
+{
+    cout << 
+    "[c]allibrate, LEFT/RIGHT position, UP walk, DOWN stop, [s]tand" << endl;
+    cout <<
+    "[h]ang, 'a' toggle pump, [v]alve toggle, [p]ause" << endl;
+    cout <<
+    "^c to exit." << endl;
+}
+
+void
 register_key_handler()
 {
+    explain_keys();
     sched->add_io_item(fileno(stdin), &key_handler);
 }
 
@@ -53,12 +65,6 @@ stdin_handler::reset()
 #define ARROW_DOWN 66
 #define ARROW_RIGHT 67
 #define ARROW_LEFT 68
-
-#define check_exit(c)                                                       \
-    if (c == 'c') {                                                         \
-        cout << "Exiting config mode." << endl;                             \
-        return;                                                             \
-    }
 
 void
 stdin_handler::inc_servo(int num)
@@ -179,8 +185,8 @@ stdin_handler::run_callibration()
     while (1) {
         while (1) {
             cout << "Enter [f]orward, [b]backward, [u]p, or [d]own ..." << endl;
+            cout << "[SPACE]: quit, s: save" << endl;
             if (read(fileno(stdin), &c, 1));
-            check_exit(c);
             m = c;
             if (m == 'f' || m == 'b' || m == 'u' || m == 'd')
                 break;
@@ -221,7 +227,6 @@ stdin_handler::run_callibration()
 
         while (1) {
             if (read(fileno(stdin), &c, 1));
-            check_exit(c);
             if (c == ARROW_RIGHT) {
                 inc_servo(servo);
             } else if (c == ARROW_LEFT) {
@@ -282,14 +287,14 @@ stdin_handler::io_fire(scheduler *psched)
 
             case ARROW_UP:
                 cout << "walking ..." << endl;
-                /* hand the control entierly over to the thread driven
+                /* hand the control entirely over to the thread driven
                    walker */
                 unregister_key_handler();
                 spine->walk(sched);
                 break;
 
             case ARROW_DOWN:
-                cout << "halt walking ..." << endl;
+                cout << "walking with halt ..." << endl;
                 unregister_key_handler();
                 spine->halt_walk(sched);
                 break;
@@ -335,6 +340,7 @@ stdin_handler::io_fire(scheduler *psched)
             default:
                 break;
         }
+        explain_keys();
     }
 }
 
